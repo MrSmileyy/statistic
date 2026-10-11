@@ -763,6 +763,33 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === hintModal) hintModal.classList.add("hidden");
     });
 
+    // Mobile Plot Tabs
+    const tabBtnReal = document.getElementById("tab-btn-real");
+    const tabBtnFp = document.getElementById("tab-btn-fp");
+    const plotBoxReal = document.getElementById("plot-box-real");
+    const plotBoxFp = document.getElementById("plot-box-fp");
+
+    function setActiveMobileTab(tab) {
+        if (!tabBtnReal || !tabBtnFp || !plotBoxReal || !plotBoxFp) return;
+        if (tab === 'real') {
+            tabBtnReal.classList.add("active");
+            tabBtnFp.classList.remove("active");
+            plotBoxReal.classList.remove("mobile-hidden");
+            plotBoxFp.classList.add("mobile-hidden");
+        } else {
+            tabBtnFp.classList.add("active");
+            tabBtnReal.classList.remove("active");
+            plotBoxFp.classList.remove("mobile-hidden");
+            plotBoxReal.classList.add("mobile-hidden");
+        }
+    }
+
+    if (tabBtnReal && tabBtnFp) {
+        tabBtnReal.addEventListener("click", () => setActiveMobileTab('real'));
+        tabBtnFp.addEventListener("click", () => setActiveMobileTab('fp'));
+        setActiveMobileTab('real');
+    }
+
     // Boot
     initApp();
 });

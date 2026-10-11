@@ -68,12 +68,18 @@
             </aside>
 
             <main class="visualizations">
+                <!-- Mobile Tabs (visibili solo su schermi piccoli) -->
+                <div class="mobile-plot-tabs" id="mobile-plot-tabs">
+                    <button class="mobile-tab-btn active" id="tab-btn-real" type="button">Curva &reals;</button>
+                    <button class="mobile-tab-btn" id="tab-btn-fp" type="button">Campo &Fopf;<sub>p</sub></button>
+                </div>
+
                 <div class="plots-container">
-                    <div class="plot-box">
+                    <div class="plot-box" id="plot-box-real">
                         <h3>Rappresentazione sugli assi cartesiani nel campo &reals;</h3>
                         <div id="real-plot" class="svg-container"></div>
                     </div>
-                    <div class="plot-box">
+                    <div class="plot-box" id="plot-box-fp">
                         <h3>Visualizzazione del piano affine del campo &Fopf;<sub><i>p</i></sub></h3>
                         <div id="fp-plot" class="svg-container"></div>
                     </div>
