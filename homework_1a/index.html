@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toy ECC su secp256k1</title>
+    <meta name="description" content="Schema crittografico didattico su secp256k1 con chiave privata debole e cifratura EC-ElGamal.">
+    <link rel="stylesheet" href="style/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="title-area">
+                <h1>Toy Scheme ECC su secp256k1</h1>
+                <p class="subtitle"><span class="math">y<sup>2</sup> = x<sup>3</sup> + 7 (mod p)</span></p>
+            </div>
+            <button id="btn-help" class="btn btn-secondary">? Spiegazione</button>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="card">
+                    <h3>Parametri della curva</h3>
+                    <p class="small-text">Valori ufficiali dello standard SEC 2, in esadecimale.</p>
+                    <div class="param-list" id="curve-params"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Generazione chiavi</h3>
+                    <p class="small-text">
+                        La chiave privata <i>d</i> è limitata all'intervallo
+                        [<span id="d-min"></span>, <span id="d-max"></span>].
+                    </p>
+                    <div class="input-group">
+                        <label for="input-d">Privata <i>d</i>:</label>
+                        <input type="number" id="input-d" min="1" max="50000" />
+                    </div>
+                    <div class="controls">
+                        <button id="btn-random-key" class="btn btn-primary">Casuale</button>
+                        <button id="btn-use-key" class="btn">Usa questa <i>d</i></button>
+                    </div>
+                    <div id="key-status" class="status-msg"></div>
+                </div>
+
+                <div class="card warning-card">
+                    <h3>Perché è debole</h3>
+                    <p class="small-text">
+                        Con soli 50.000 valori possibili per <i>d</i>, un attaccante che conosce <i>Q</i> e <i>G</i>
+                        può calcolare <i>G</i>, 2<i>G</i>, 3<i>G</i>, ... finché non ottiene <i>Q</i>.
+                        La curva resta quella di Bitcoin: la sicurezza crolla solo per la scelta della chiave.
+                    </p>
+                </div>
+            </aside>
+
+            <main class="content">
+                <section class="card">
+                    <h3>1. Generazione chiavi: scelta di d e calcolo di Q = d &sdot; G</h3>
+                    <p class="small-text">
+                        La chiave privata <i>d</i> è un intero segreto. La chiave pubblica <i>Q</i> <b>non</b> viene scelta
+                        a caso, ma è determinata come punto della curva moltiplicando il punto generatore <i>G</i> per <i>d</i>.
+                    </p>
+                    <table class="key-table">
+                        <tbody>
+                            <tr>
+                                <th>Chiave privata <i>d</i></th>
+                                <td><span id="out-d" class="mono"></span></td>
+                            </tr>
+                            <tr>
+                                <th><i>d</i> (hex)</th>
+                                <td><span id="out-d-hex" class="mono"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Pubblica <i>Q</i>.x</th>
+                                <td><span id="out-qx" class="mono"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Pubblica <i>Q</i>.y</th>
+                                <td><span id="out-qy" class="mono"></span></td>
+                            </tr>
+                            <tr>
+                                <th><i>Q</i> compressa</th>
+                                <td><span id="out-qc" class="mono"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Verifica</th>
+                                <td><span id="out-check"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="key-process" class="process"></div>
+                </section>
+
+                <section class="card">
+                    <h3>2. Cifratura EC-ElGamal (mittente)</h3>
+                    <p class="small-text">
+                        Il mittente conosce solo la chiave pubblica <i>Q</i> del destinatario.
+                        Scrivi un messaggio e premi "Cifra": sotto verrà mostrato ogni passaggio, un blocco alla volta.
+                    </p>
+                    <label class="field-label" for="input-message">Messaggio in chiaro</label>
+                    <textarea id="input-message" rows="3">Ciao Sapienza! Questo messaggio viene cifrato con la chiave pubblica Q.</textarea>
+                    <button id="btn-encrypt" class="btn btn-primary">Cifra con <i>Q</i></button>
+                    <span id="enc-info" class="info-text"></span>
+
+                    <div id="enc-process" class="process hidden"></div>
+
+                    <label class="field-label" for="output-cipher">
+                        Cifrato da trasmettere (una riga per blocco: <i>C</i><sub>1</sub> || <i>C</i><sub>2</sub>)
+                    </label>
+                    <textarea id="output-cipher" rows="4" class="mono" spellcheck="false"></textarea>
+                </section>
+
+                <section class="card">
+                    <h3>3. Decifratura EC-ElGamal (destinatario)</h3>
+                    <p class="small-text">
+                        Il destinatario riceve solo il cifrato qui sopra e usa la propria chiave privata <i>d</i>.
+                        Se si rigenera la chiave dopo aver cifrato, la decifratura fallisce.
+                    </p>
+                    <button id="btn-decrypt" class="btn btn-success">Decifra con <i>d</i></button>
+                    <span id="dec-info" class="info-text"></span>
+
+                    <div id="dec-process" class="process hidden"></div>
+
+                    <label class="field-label" for="output-plain">Messaggio decifrato</label>
+                    <textarea id="output-plain" rows="3" readonly></textarea>
+                    <div id="dec-status"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Spiegazione -->
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Cenni Teorici: Toy Scheme EC-ElGamal su secp256k1</h2>
+            <div class="modal-body">
+                <h3>1. La curva secp256k1</h3>
+                <p>
+                    È la curva di Koblitz usata da Bitcoin, definita sul campo &Fopf;<sub><i>p</i></sub> con
+                    <i>p</i> = 2<sup>256</sup> - 2<sup>32</sup> - 977 e parametri <i>a</i> = 0, <i>b</i> = 7.
+                    Il punto base <i>G</i> genera un sottogruppo ciclico di ordine primo <i>n</i> &asymp; 2<sup>256</sup>.
+                    Tutti i calcoli usano i <code>BigInt</code> di JavaScript, perché il tipo <code>Number</code>
+                    perde precisione oltre 2<sup>53</sup>.
+                </p>
+
+                <h3>2. Addizione e raddoppio</h3>
+                <ul class="math-list">
+                    <li>
+                        <strong>Addizione (<i>P &ne; Q</i>):</strong> retta secante per <i>P</i> e <i>Q</i>.
+                        <div class="math-block">s &equiv; (y<sub>Q</sub> - y<sub>P</sub>) &sdot; (x<sub>Q</sub> - x<sub>P</sub>)<sup>-1</sup> mod p</div>
+                    </li>
+                    <li>
+                        <strong>Raddoppio (<i>P = Q</i>):</strong> retta tangente in <i>P</i>.
+                        <div class="math-block">s &equiv; (3x<sub>P</sub><sup>2</sup> + a) &sdot; (2y<sub>P</sub>)<sup>-1</sup> mod p</div>
+                    </li>
+                </ul>
+                <p>In entrambi i casi:</p>
+                <div class="math-block">
+                    x<sub>3</sub> &equiv; s<sup>2</sup> - x<sub>P</sub> - x<sub>Q</sub>, &nbsp;
+                    y<sub>3</sub> &equiv; s(x<sub>P</sub> - x<sub>3</sub>) - y<sub>P</sub> &nbsp; (mod p)
+                </div>
+                <p>L'inverso modulare si calcola con l'algoritmo di Euclide esteso.</p>
+
+                <h3>3. Double-and-Add</h3>
+                <p>
+                    Per calcolare <i>k &sdot; P</i> si legge <i>k</i> in binario dal bit più significativo:
+                    a ogni bit si raddoppia l'accumulatore, e se il bit vale 1 si somma <i>P</i>.
+                    Servono circa log<sub>2</sub>(<i>k</i>) passi invece di <i>k</i> - 1 addizioni.
+                </p>
+
+                <h3>4. Ruolo delle chiavi</h3>
+                <p>
+                    La <strong>chiave privata</strong> è un intero <i>d</i>; la <strong>chiave pubblica</strong> è
+                    il punto <i>Q = d &sdot; G</i>. Ricavare <i>d</i> da <i>Q</i> è il problema del logaritmo
+                    discreto su curve ellittiche (ECDLP). In questo schema <i>d</i> &isin; [1, 50000], quindi
+                    bastano al più 50.000 addizioni di <i>G</i> per trovarlo.
+                </p>
+
+                <h3>5. Cifratura EC-ElGamal</h3>
+                <p>
+                    Il testo viene diviso in blocchi e ogni blocco è mappato su un punto <i>M</i> con il metodo
+                    di Koblitz: si cercano ascisse <i>x = m &sdot; 256 + j</i> finché <i>x</i><sup>3</sup> + 7 non è
+                    un quadrato modulo <i>p</i>. Poi, con un nonce casuale <i>k</i>:
+                </p>
+                <div class="math-block">C<sub>1</sub> = k &sdot; G, &nbsp;&nbsp; C<sub>2</sub> = M + k &sdot; Q</div>
+                <p>Il destinatario, con la sua chiave privata, calcola:</p>
+                <div class="math-block">C<sub>2</sub> - d &sdot; C<sub>1</sub> = M + kdG - dkG = M</div>
+                <p>e recupera il blocco come <i>m = &lfloor;x / 256&rfloor;</i>.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/ecc.js"></script>
+    <script src="js/steps.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
