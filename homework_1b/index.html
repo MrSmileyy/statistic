@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crittanalisi Statistica: Cesare vs Toy ECC</title>
-    <meta name="description" content="Crittanalisi statistica con test Chi-Quadro sul cifrario di Cesare, attacco brute-force a Toy ECC e confronto grafico con Chart.js.">
+    <meta name="description"
+        content="Crittanalisi statistica con test Chi-Quadro sul cifrario di Cesare, attacco brute-force a Toy ECC e confronto grafico con Chart.js.">
     <link rel="stylesheet" href="style/style.css">
     <!-- Chart.js da CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,10 +17,10 @@
         <header>
             <div class="title-area">
                 <h1>Crittanalisi Statistica: Cesare vs Toy ECC</h1>
-                <p class="subtitle">Analisi delle frequenze (Chi-Quadro), risoluzione dell'ECDLP e confronto empirico</p>
+                <p class="subtitle">Analisi delle frequenze (Chi-Quadro), risoluzione dell'ECDLP e confronto empirico
+                </p>
             </div>
             <div style="display: flex; gap: 8px;">
-                <button id="btn-header-pdf" class="btn btn-primary" title="Visualizza il paper accademico PDF">📄 Mostra Paper PDF</button>
                 <button id="btn-help" class="btn btn-secondary">? Spiegazione Teorica</button>
             </div>
         </header>
@@ -59,15 +60,19 @@
                         <div><b>Q.y:</b> <span id="ecc-qy-display" class="mono"></span></div>
                         <div><b>Q compresso:</b> <span id="ecc-qc-display" class="mono"></span></div>
                     </div>
-                    <button id="btn-random-ecc-key" class="btn btn-primary full-width" style="width: 100%;">Genera Nuova Chiave ECC</button>
+                    <button id="btn-random-ecc-key" class="btn btn-primary full-width" style="width: 100%;">Genera Nuova
+                        Chiave ECC</button>
                 </div>
 
                 <div class="card warning-card">
                     <h3>Confronto Spazi delle Chiavi</h3>
                     <ul class="small-text" style="padding-left: 18px; margin: 0;">
-                        <li><b>Cesare:</b> 25 chiavi (&approx; 2<sup>4.6</sup>). Vulnerabile all'istante sia a forza bruta che per analisi delle frequenze.</li>
-                        <li><b>Toy ECC:</b> 50.000 chiavi (&approx; 2<sup>15.6</sup>). Resistente ad analisi statistica, vulnerabile a forza bruta in pochi secondi.</li>
-                        <li><b>secp256k1 Reale:</b> &approx; 2<sup>256</sup> chiavi. Inattaccabile da qualsiasi supercomputer noto.</li>
+                        <li><b>Cesare:</b> 25 chiavi (&approx; 2<sup>4.6</sup>). Vulnerabile all'istante sia a forza
+                            bruta che per analisi delle frequenze.</li>
+                        <li><b>Toy ECC:</b> 50.000 chiavi (&approx; 2<sup>15.6</sup>). Resistente ad analisi statistica,
+                            vulnerabile a forza bruta in pochi secondi.</li>
+                        <li><b>secp256k1 Reale:</b> &approx; 2<sup>256</sup> chiavi. Inattaccabile da qualsiasi
+                            supercomputer noto.</li>
                     </ul>
                 </div>
             </aside>
@@ -80,24 +85,29 @@
                     <h3>1. Implementazione di Cesare e Crittanalisi Statistica (Chi-Quadro)</h3>
                     <p class="small-text">
                         Il cifrario di Cesare esegue una sostituzione monoalfabetica rigida: <i>c = (p + k) mod 26</i>.
-                        L'algoritmo di crittanalisi calcola per ciascuno dei 25 shift possibili la frequenza dei caratteri e valuta la distanza statistica Chi-Quadro rispetto alla lingua teorica.
+                        L'algoritmo di crittanalisi calcola per ciascuno dei 25 shift possibili la frequenza dei
+                        caratteri e valuta la distanza statistica Chi-Quadro rispetto alla lingua teorica.
                     </p>
 
                     <label class="field-label" for="input-text">Testo in chiaro</label>
-                    <textarea id="input-text" rows="3">Nel mezzo del cammin di nostra vita mi ritrovai per una selva oscura, che la diritta via era smarrita. Ahi quanto a dir qual era e cosa dura esta selva selvaggia e aspra e forte che nel pensier rinova la paura! Tanto e amara che poco e piu morte; ma per trattar del ben ch io vi trovai, diro de l altre cose ch io v ho scorte. La crittografia asimmetrica protegge le comunicazioni moderne garantendo riservatezza e integrita statistica.</textarea>
+                    <textarea id="input-text"
+                        rows="3">Nel mezzo del cammin di nostra vita mi ritrovai per una selva oscura, che la diritta via era smarrita. Ahi quanto a dir qual era e cosa dura esta selva selvaggia e aspra e forte che nel pensier rinova la paura! Tanto e amara che poco e piu morte; ma per trattar del ben ch io vi trovai, diro de l altre cose ch io v ho scorte. La crittografia asimmetrica protegge le comunicazioni moderne garantendo riservatezza e integrita statistica.</textarea>
 
                     <label class="field-label" for="output-caesar">Testo cifrato con Cesare</label>
                     <textarea id="output-caesar" rows="3" readonly></textarea>
 
                     <div style="margin: 12px 0;">
-                        <button id="btn-run-caesar-attack" class="btn btn-primary">Esegui Crittanalisi Chi-Quadro</button>
+                        <button id="btn-run-caesar-attack" class="btn btn-primary">Esegui Crittanalisi
+                            Chi-Quadro</button>
                         <span id="caesar-attack-status"></span>
                     </div>
 
-                    <label class="field-label" for="caesar-decrypted-attack">Testo forzato e decifrato dall'attacco statistico</label>
+                    <label class="field-label" for="caesar-decrypted-attack">Testo forzato e decifrato dall'attacco
+                        statistico</label>
                     <textarea id="caesar-decrypted-attack" rows="3" readonly></textarea>
 
-                    <p class="small-text" style="margin-top: 10px;"><b>Primi 5 candidati secondo il test Chi-Quadro (valore piu' basso = corrispondenza migliore):</b></p>
+                    <p class="small-text" style="margin-top: 10px;"><b>Primi 5 candidati secondo il test Chi-Quadro
+                            (valore piu' basso = corrispondenza migliore):</b></p>
                     <div class="table-scroll">
                         <table class="trace-table">
                             <thead>
@@ -118,9 +128,13 @@
                 <section class="card">
                     <h3>2. Dimostrazione: Fallimento su Stringhe Corte vs Successo su Stringhe Lunghe</h3>
                     <p class="small-text">
-                        La statistica Chi-Quadro si basa sulla <b>Legge dei Grandi Numeri</b>. Su campioni molto brevi (es. 10 lettere), le fluttuazioni casuali e la varianza campionaria dominano le frequenze teoriche della lingua, portando l'algoritmo a predire chiavi errate. Su testi lunghi (> 150 lettere), la convergenza statistica garantisce un successo del 100%.
+                        La statistica Chi-Quadro si basa sulla <b>Legge dei Grandi Numeri</b>. Su campioni molto brevi
+                        (es. 10 lettere), le fluttuazioni casuali e la varianza campionaria dominano le frequenze
+                        teoriche della lingua, portando l'algoritmo a predire chiavi errate. Su testi lunghi (> 150
+                        lettere), la convergenza statistica garantisce un successo del 100%.
                     </p>
-                    <button id="btn-run-length-test" class="btn btn-secondary">Esegui Test Comparativo Lunghezze</button>
+                    <button id="btn-run-length-test" class="btn btn-secondary">Esegui Test Comparativo
+                        Lunghezze</button>
 
                     <div class="table-scroll" style="margin-top: 12px;">
                         <table class="trace-table">
@@ -144,14 +158,17 @@
                     <h3>3. Attacco a Forza Bruta al Toy ECC (Risoluzione dell'ECDLP)</h3>
                     <p class="small-text">
                         Nel nostro Toy ECC, la chiave privata <i>d</i> e' vincolata a <i>d &le; 50.000</i>.
-                        L'attacco calcola sequenzialmente <i>P = 1G, 2G, 3G, ...</i> sommando ogni volta il punto <i>G</i> fino a quando le coordinate affini non coincidono con la chiave pubblica nota <i>Q</i>, risolvendo di fatto il logaritmo discreto.
+                        L'attacco calcola sequenzialmente <i>P = 1G, 2G, 3G, ...</i> sommando ogni volta il punto
+                        <i>G</i> fino a quando le coordinate affini non coincidono con la chiave pubblica nota <i>Q</i>,
+                        risolvendo di fatto il logaritmo discreto.
                     </p>
 
                     <label class="field-label" for="output-ecc">Cifrato Toy ECC (punti compressi serializzati)</label>
                     <textarea id="output-ecc" rows="3" class="mono" readonly></textarea>
 
                     <div style="margin: 12px 0;">
-                        <button id="btn-start-ecc-crack" class="btn btn-danger">Lancia Attacco Brute-Force (ECDLP)</button>
+                        <button id="btn-start-ecc-crack" class="btn btn-danger">Lancia Attacco Brute-Force
+                            (ECDLP)</button>
                     </div>
 
                     <div class="progress-container">
@@ -168,7 +185,9 @@
                 <section class="card">
                     <h3>4. Comparazione Statistica e Istogrammi di Frequenza (Chart.js)</h3>
                     <p class="small-text">
-                        Confronto visivo delle distribuzioni empiriche: osserva come Cesare conserva i picchi della lingua italiana (traslati dello shift <i>k</i>), mentre il cifrato ECC appiattisce completamente la distribuzione dei simboli, rendendola indistinguibile dal rumore bianco uniforme.
+                        Confronto visivo delle distribuzioni empiriche: osserva come Cesare conserva i picchi della
+                        lingua italiana (traslati dello shift <i>k</i>), mentre il cifrato ECC appiattisce completamente
+                        la distribuzione dei simboli, rendendola indistinguibile dal rumore bianco uniforme.
                     </p>
 
                     <div class="charts-grid">
@@ -204,29 +223,36 @@
 
                 <!-- 5. Visualizzazione Nativa del Paper PDF -->
                 <section class="card" id="paper-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                         <div>
-                            <h3 style="margin-bottom: 4px;">5. Elaborato di Ricerca (paper_hw_1b.pdf)</h3>
-                            <p class="small-text" style="margin: 0;">
-                                Visualizzazione nativa nel browser del paper accademico e della relazione tecnica.
-                            </p>
+                            <h3 style="margin-bottom: 4px;">5. Paper tecnico (in Inglese)</h3>
+
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button id="btn-toggle-pdf" class="btn btn-primary">Mostra / Nascondi PDF</button>
-                            <a href="paper_hw_1b.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Apri in Nuova Scheda</a>
+                            <a href="paper_hw_1b.pdf" target="_blank" rel="noopener noreferrer"
+                                class="btn btn-secondary">Apri in Nuova Scheda</a>
                             <a href="paper_hw_1b.pdf" download="paper_hw_1b.pdf" class="btn">Scarica PDF</a>
                         </div>
                     </div>
 
-                    <div id="pdf-container" style="width: 100%; height: 780px; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; background: #525659; margin-top: 10px;">
-                        <object id="native-pdf-object" data="paper_hw_1b.pdf#view=FitH&toolbar=1&navpanes=1" type="application/pdf" width="100%" height="100%">
-                            <div style="padding: 40px 20px; text-align: center; color: #fff; font-family: var(--font-ui);">
-                                <h4 style="margin: 0 0 10px 0; font-size: 1.15rem; color: #fff;">Visualizzatore PDF Nativo</h4>
-                                <p style="font-size: 0.95rem; max-width: 600px; margin: 0 auto 16px auto; color: #ddd; line-height: 1.5;">
-                                    Il file <b>paper_hw_1b.pdf</b> non e' ancora presente nella cartella <code>homework_1b/</code> oppure il browser richiede di aprirlo separatamente.
-                                    Inserisci il PDF generato con il nome <code>paper_hw_1b.pdf</code> per caricarlo automaticamente qui dentro.
+                    <div id="pdf-container"
+                        style="width: 100%; height: 780px; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; background: #525659; margin-top: 10px;">
+                        <object id="native-pdf-object" data="paper_hw_1b.pdf#view=FitH&toolbar=1&navpanes=1"
+                            type="application/pdf" width="100%" height="100%">
+                            <div
+                                style="padding: 40px 20px; text-align: center; color: #fff; font-family: var(--font-ui);">
+                                <h4 style="margin: 0 0 10px 0; font-size: 1.15rem; color: #fff;">Visualizzatore PDF
+                                    Nativo</h4>
+                                <p
+                                    style="font-size: 0.95rem; max-width: 600px; margin: 0 auto 16px auto; color: #ddd; line-height: 1.5;">
+                                    Il file <b>paper_hw_1b.pdf</b> non e' ancora presente nella cartella
+                                    <code>homework_1b/</code> oppure il browser richiede di aprirlo separatamente.
+                                    Inserisci il PDF generato con il nome <code>paper_hw_1b.pdf</code> per caricarlo
+                                    automaticamente qui dentro.
                                 </p>
-                                <a href="paper_hw_1b.pdf" target="_blank" class="btn btn-primary">Apri paper_hw_1b.pdf</a>
+                                <a href="paper_hw_1b.pdf" target="_blank" class="btn btn-primary">Apri
+                                    paper_hw_1b.pdf</a>
                             </div>
                         </object>
                     </div>
@@ -244,23 +270,33 @@
             <div class="modal-body">
                 <h3>1. Il Test Chi-Quadro (&chi;<sup>2</sup>)</h3>
                 <p>
-                    La statistica del Chi-Quadro misura lo scostamento quadratico ponderato tra le frequenze empiriche osservate <i>O<sub>i</sub></i> in un testo decifrato candidato e le frequenze teoriche attese <i>E<sub>i</sub> = N &middot; p<sub>i</sub></i> per ciascuna lettera <i>i</i> dell'alfabeto:
+                    La statistica del Chi-Quadro misura lo scostamento quadratico ponderato tra le frequenze empiriche
+                    osservate <i>O<sub>i</sub></i> in un testo decifrato candidato e le frequenze teoriche attese
+                    <i>E<sub>i</sub> = N &middot; p<sub>i</sub></i> per ciascuna lettera <i>i</i> dell'alfabeto:
                 </p>
                 <div style="text-align: center; font-style: italic; margin: 10px 0; font-size: 1.1rem;">
-                    &chi;<sup>2</sup>(k) = &sum;<sub>i &isin; {A..Z}</sub> [ (O<sub>i</sub> - E<sub>i</sub>)<sup>2</sup> / E<sub>i</sub> ]
+                    &chi;<sup>2</sup>(k) = &sum;<sub>i &isin; {A..Z}</sub> [ (O<sub>i</sub> - E<sub>i</sub>)<sup>2</sup>
+                    / E<sub>i</sub> ]
                 </div>
                 <p>
-                    Poiché il cifrario di Cesare è una permutazione ciclica deterministica, lo shift corretto produce un valore &chi;<sup>2</sup> marcatamente inferiore a tutti gli altri 24 shift errati.
+                    Poiché il cifrario di Cesare è una permutazione ciclica deterministica, lo shift corretto produce un
+                    valore &chi;<sup>2</sup> marcatamente inferiore a tutti gli altri 24 shift errati.
                 </p>
 
                 <h3>2. Effetto della Lunghezza del Testo</h3>
                 <p>
-                    Per la Legge dei Grandi Numeri, la frequenza relativa campionaria converge alla probabilita' teorica quando <i>N &rarr; &infin;</i>. Con testi molto brevi (es. 10 caratteri), una singola lettera insolita (es. 'Z' o 'Q') causa un picco che inganna il test, generando falsi positivi.
+                    Per la Legge dei Grandi Numeri, la frequenza relativa campionaria converge alla probabilita' teorica
+                    quando <i>N &rarr; &infin;</i>. Con testi molto brevi (es. 10 caratteri), una singola lettera
+                    insolita (es. 'Z' o 'Q') causa un picco che inganna il test, generando falsi positivi.
                 </p>
 
                 <h3>3. La Barriera Asimmetrica dell'ECC</h3>
                 <p>
-                    In EC-ElGamal, l'attacco statistico è vanificato dalla presenza del nonce casuale <i>k</i>: blocchi identici generano punti cifrati diversi (crittografia probabilistica indistinguibile sotto attacco con testo in chiaro scelto, IND-CPA). L'unico attacco applicabile sul Toy ECC è la ricerca esaustiva dello scalare <i>d</i> per addizione iterativa, resa possibile unicamente dalla limitazione artificiale a 50.000 chiavi.
+                    In EC-ElGamal, l'attacco statistico è vanificato dalla presenza del nonce casuale <i>k</i>: blocchi
+                    identici generano punti cifrati diversi (crittografia probabilistica indistinguibile sotto attacco
+                    con testo in chiaro scelto, IND-CPA). L'unico attacco applicabile sul Toy ECC è la ricerca esaustiva
+                    dello scalare <i>d</i> per addizione iterativa, resa possibile unicamente dalla limitazione
+                    artificiale a 50.000 chiavi.
                 </p>
             </div>
         </div>

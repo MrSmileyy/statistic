@@ -183,25 +183,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 7. Gestione Visualizzazione PDF paper_hw_1b.pdf
+    // 7. Gestione Visualizzazione PDF paper_hw_1b.pdf (se presenti i pulsanti)
     const pdfContainer = $("pdf-container");
-    $("btn-toggle-pdf").addEventListener("click", () => {
-        if (pdfContainer.style.display === "none") {
-            pdfContainer.style.display = "block";
-            $("btn-toggle-pdf").textContent = "Nascondi PDF";
-        } else {
-            pdfContainer.style.display = "none";
-            $("btn-toggle-pdf").textContent = "Mostra PDF";
-        }
-    });
+    const btnTogglePdf = $("btn-toggle-pdf");
+    if (btnTogglePdf && pdfContainer) {
+        btnTogglePdf.addEventListener("click", () => {
+            if (pdfContainer.style.display === "none") {
+                pdfContainer.style.display = "block";
+                btnTogglePdf.textContent = "Nascondi PDF";
+            } else {
+                pdfContainer.style.display = "none";
+                btnTogglePdf.textContent = "Mostra PDF";
+            }
+        });
+    }
 
-    $("btn-header-pdf").addEventListener("click", () => {
-        if (pdfContainer.style.display === "none") {
+    const btnHeaderPdf = $("btn-header-pdf");
+    if (btnHeaderPdf && pdfContainer) {
+        btnHeaderPdf.addEventListener("click", () => {
             pdfContainer.style.display = "block";
-            $("btn-toggle-pdf").textContent = "Nascondi PDF";
-        }
-        $("paper-section").scrollIntoView({ behavior: "smooth" });
-    });
+            if (btnTogglePdf) btnTogglePdf.textContent = "Nascondi PDF";
+            const paperSec = $("paper-section");
+            if (paperSec) paperSec.scrollIntoView({ behavior: "smooth" });
+        });
+    }
 
     // 8. Event Listeners
     $("input-text").addEventListener("input", updateCiphers);
