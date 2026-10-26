@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulazione Processi Stocastici: Bernoulli & Rademacher</title>
+    <meta name="description"
+        content="Simulazione interattiva di processi stocastici discreti, random walk di Bernoulli e Rademacher, Legge dei Grandi Numeri e Teorema del Limite Centrale.">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <a href="../index.html" class="back-link" title="Torna all'indice generale">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Indice</span>
+                </a>
+                <h1>Simulazione Processi Stocastici: Bernoulli &amp; Rademacher</h1>
+                <p class="subtitle">Analisi empirica dei Random Walk, Legge dei Grandi Numeri (LLN) e Teorema del Limite
+                    Centrale (TLC)</p>
+            </div>
+            <div>
+                <button id="btn-help" class="btn btn-secondary" type="button">? Spiegazione Teorica</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="card">
+                    <h3>Modello Stocastico</h3>
+                    <div class="radio-group">
+                        <label class="radio-card active">
+                            <input type="radio" name="model" value="bernoulli" checked>
+                            <span>Bernoulli {0, 1}</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="model" value="rademacher">
+                            <span>Rademacher {-1, +1}</span>
+                        </label>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label for="input-n">Numero di sistemi / passi (n):</label>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="range-n" min="20" max="1000" step="10" value="200">
+                            <input type="number" id="input-n" min="20" max="1000" step="10" value="200">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label for="input-m">Numero di attaccanti / traiettorie (m):</label>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="range-m" min="20" max="1000" step="10" value="150">
+                            <input type="number" id="input-m" min="20" max="1000" step="10" value="150">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label for="input-p">Probabilità di successo (p):</label>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="range-p" min="0.01" max="0.99" step="0.01" value="0.50">
+                            <input type="number" id="input-p" min="0.01" max="0.99" step="0.01" value="0.50">
+                        </div>
+                    </div>
+
+                    <button id="btn-run" class="btn btn-primary btn-full" type="button">
+                        Esegui Simulazione
+                    </button>
+
+                    <div class="preset-group">
+                        <button class="btn-chip" data-preset="fair-rademacher" type="button">Rademacher Equo
+                            (p=0.5)</button>
+                        <button class="btn-chip" data-preset="biased-bernoulli" type="button">Bernoulli (p=0.7)</button>
+                        <button class="btn-chip" data-preset="large-sample" type="button">Campione Ampio (n=600,
+                            m=350)</button>
+                    </div>
+                </div>
+
+                <div class="card card-accent">
+                    <h3>Momenti Teorici del Modello</h3>
+                    <p class="small-text">Valori analitici attesi calcolati sui parametri correnti:</p>
+                    <table class="stats-table">
+                        <tbody>
+                            <tr>
+                                <td>Media per passo E[X]:</td>
+                                <td id="theory-mean-step">-</td>
+                            </tr>
+                            <tr>
+                                <td>Varianza per passo Var(X):</td>
+                                <td id="theory-var-step">-</td>
+                            </tr>
+                            <tr>
+                                <td>Valore atteso finale E[S<sub>n</sub>]:</td>
+                                <td id="theory-expected-sn">-</td>
+                            </tr>
+                            <tr>
+                                <td>Dev. standard finale &sigma;(S<sub>n</sub>):</td>
+                                <td id="theory-std-sn">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </aside>
+
+            <main class="content">
+                <div class="metrics-bar">
+                    <div class="metric-card">
+                        <span class="metric-label">Valore Atteso Teorico E[S<sub>n</sub>]</span>
+                        <span class="metric-value" id="metric-expected-sn">-</span>
+                        <span class="metric-sub">Calcolato analiticamente (n &sdot; &mu;)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Media Campionaria Finale S&#772;<sub>n</sub></span>
+                        <span class="metric-value" id="metric-sample-sn">-</span>
+                        <span class="metric-sub">Media empirica su m traiettorie</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Punteggio Medio S&#772;<sub>n</sub> / n</span>
+                        <span class="metric-value" id="metric-sample-avg">-</span>
+                        <span class="metric-sub">Convergenza LLN verso E[X]</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Tempo di Calcolo</span>
+                        <span class="metric-value" id="metric-exec-time">-</span>
+                        <span class="metric-sub">Generazione vettoriale &amp; Plotly</span>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Traiettorie nel Tempo (Random Walk)</h4>
+                            <span class="chart-tag">t &in; [0, n] &rarr; S<sub>t</sub></span>
+                        </div>
+                        <div id="chart-trajectories" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Distribuzione Finale del Punteggio</h4>
+                            <span class="chart-tag">Istante t = n &rarr; S<sub>n</sub></span>
+                        </div>
+                        <div id="chart-final-sums" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Distribuzione della Media Campionaria (LLN)</h4>
+                            <span class="chart-tag">S<sub>n</sub> / n &rarr; E[X]</span>
+                        </div>
+                        <div id="chart-averages" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Distribuzione Normalizzata (TLC)</h4>
+                            <span class="chart-tag">Z<sub>n</sub> vs &Nu;(0, 1)</span>
+                        </div>
+                        <div id="chart-normalized" class="chart-container"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="help-modal">
+        <div class="modal-box">
+            <h2>Spiegazione Teorica: Processi Stocastici e Teoremi Limite</h2>
+
+            <h3>1. Modello di Bernoulli vs Modello di Rademacher</h3>
+            <p>
+                Un processo stocastico discreto nel tempo &egrave; una successione di variabili aleatorie
+                {X<sub>t</sub>}<sub>t=1</sub><sup>n</sup> i.i.d. (indipendenti e identicamente distribuite).
+            </p>
+            <ul>
+                <li>
+                    <b>Modello di Bernoulli:</b> Ogni incremento X<sub>t</sub> assume valori nell'insieme {0, 1} con
+                    P(X<sub>t</sub> = 1) = p e P(X<sub>t</sub> = 0) = 1 - p.
+                    I momenti sono &mu; = p e &sigma;<sup>2</sup> = p(1 - p).
+                    Rappresenta, nel contesto della sicurezza, il conteggio dei server o sistemi violati con successo.
+                </li>
+                <li>
+                    <b>Modello di Rademacher:</b> Ogni incremento X<sub>t</sub> assume valori nell'insieme {-1, +1} con
+                    P(X<sub>t</sub> = 1) = p e P(X<sub>t</sub> = -1) = 1 - p.
+                    Nel caso simmetrico (p = 0.5), &mu; = 0 e &sigma;<sup>2</sup> = 1. Nel caso asimmetrico,
+                    &mu; = 2p - 1 e &sigma;<sup>2</sup> = 4p(1 - p).
+                </li>
+            </ul>
+
+            <h3>2. La Somma Parziale e il Random Walk</h3>
+            <p>
+                La traiettoria dell'attaccante &egrave; descritta dal processo di somma parziale:
+                <br>
+                <b>S<sub>0</sub> = 0</b>, &emsp; <b>S<sub>n</sub> = &sum;<sub>k=1</sub><sup>n</sup> X<sub>k</sub></b>.
+                <br>
+                Per linearit&agrave; del valore atteso e indipendenza, E[S<sub>n</sub>] = n &sdot; &mu; e
+                Var(S<sub>n</sub>) = n &sdot; &sigma;<sup>2</sup>. La dispersione attorno al valore medio cresce
+                in modo proporzionale a &radic;n.
+            </p>
+
+            <h3>3. Legge dei Grandi Numeri (LLN)</h3>
+            <p>
+                La Legge Forte dei Grandi Numeri sancisce che la media campionaria converge quasi certamente al valore
+                atteso:
+                <br>
+                <b>S<sub>n</sub> / n &rarr; &mu; &emsp; per n &rarr; &infin;</b>.
+                <br>
+                All'aumentare di n, la varianza della media campionaria Var(S<sub>n</sub> / n) = &sigma;<sup>2</sup> / n
+                decade verso zero, determinando una distribuzione sempre pi&ugrave; concentrata e degenere su &mu;.
+            </p>
+
+            <h3>4. Teorema del Limite Centrale (TLC)</h3>
+            <p>
+                Il Teorema del Limite Centrale afferma che, indipendentemente dalla distribuzione discreta iniziale di
+                X<sub>k</sub>,
+                la variabile aleatoria standardizzata converge in legge a una distribuzione Normale standard:
+                <br>
+                <b>Z<sub>n</sub> = (S<sub>n</sub> - n&mu;) / (&radic;n &sdot; &sigma;) &rarr;<sup>d</sup> &Nu;(0,
+                    1)</b>.
+                <br>
+                Il grafico normalizzato mostra come l'istogramma empirico a densit&agrave; aderisca con eccezionale
+                precisione alla curva a campana di Gauss.
+            </p>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-primary" id="btn-close-modal" type="button">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/simulation.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
