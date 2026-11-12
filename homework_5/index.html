@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 5: Statistical Independence &amp; Contingency Analysis</title>
+    <meta name="description"
+        content="Programmatic contingency table construction, marginal and conditional frequencies, expected frequencies under independence, Chi-square test, p-value, and association vs causality.">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <a href="../index.html" class="back-link" title="Back to main index">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Index</span>
+                </a>
+                <h1>Homework 5: Statistical Independence &amp; Contingency Analysis</h1>
+                <p class="subtitle">Programmatic contingency tables, marginal &amp; conditional frequencies, Chi-square test, p-value, and association vs. causality</p>
+            </div>
+            <div>
+                <button id="btn-help" class="btn btn-secondary" type="button">? Theoretical Guide</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="card">
+                    <h3>Bivariate Dataset (X, F)</h3>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label for="select-dataset">Preset Dataset:</label>
+                        </div>
+                        <select id="select-dataset" class="select-input">
+                            <option value="cyber_incidents" selected>Cybersecurity: Attack Vector vs. Severity</option>
+                            <option value="independent_experiment">Browser Engine vs. Coin Outcome (Independent)</option>
+                            <option value="confounding_summer">Ice Cream Sales vs. Drowning Risk (Confounded)</option>
+                            <option value="custom">Custom Bivariate Input (CSV)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label>Significance Level (&alpha;):</label>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-card">
+                                <input type="radio" name="alpha" value="0.10">
+                                <span>0.10</span>
+                            </label>
+                            <label class="radio-card active">
+                                <input type="radio" name="alpha" value="0.05" checked>
+                                <span>0.05</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="alpha" value="0.01">
+                                <span>0.01</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header">
+                            <label for="textarea-csv">Raw Bivariate Records (X, F):</label>
+                        </div>
+                        <textarea id="textarea-csv" class="dataset-textarea" spellcheck="false"
+                            placeholder="CategoryX, CategoryF&#10;Phishing, Low&#10;Ransomware, Critical"></textarea>
+                    </div>
+
+                    <button id="btn-analyze" class="btn btn-primary btn-full" type="button">
+                        Analyze Dataset
+                    </button>
+
+                    <div class="preset-group">
+                        <button class="btn-chip" id="btn-gen-indep" type="button">Generate Independent</button>
+                        <button class="btn-chip" id="btn-gen-dep" type="button">Generate Dependent</button>
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="card card-accent">
+                    <h3>Test Diagnostics</h3>
+                    <p class="small-text" id="ds-description">-</p>
+                    <table class="stats-table">
+                        <tbody>
+                            <tr>
+                                <td>Sample Size (N):</td>
+                                <td id="diag-n">-</td>
+                            </tr>
+                            <tr>
+                                <td>Table Dimensions (r &times; c):</td>
+                                <td id="diag-dims">-</td>
+                            </tr>
+                            <tr>
+                                <td>Degrees of Freedom (df):</td>
+                                <td id="diag-df">-</td>
+                            </tr>
+                            <tr>
+                                <td>Critical &chi;&sup2;<sub>&alpha;, df</sub>:</td>
+                                <td id="diag-crit">-</td>
+                            </tr>
+                            <tr>
+                                <td>Cells with E<sub>ij</sub> &lt; 5:</td>
+                                <td id="diag-low-cells">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="content">
+                <!-- Decision Banner -->
+                <div id="decision-banner" class="decision-banner decision-dependent">
+                    <span id="decision-text">Loading analysis...</span>
+                    <span id="decision-badge" class="mono" style="font-weight: 700;"></span>
+                </div>
+
+                <!-- Metrics Bar -->
+                <div class="metrics-bar">
+                    <div class="metric-card">
+                        <span class="metric-label">Chi-Square (&chi;&sup2;)</span>
+                        <span class="metric-value" id="metric-chi2">-</span>
+                        <span class="metric-sub" id="metric-chi2-sub">Pearson test statistic</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Exact p-Value</span>
+                        <span class="metric-value" id="metric-pval">-</span>
+                        <span class="metric-sub" id="metric-pval-sub">Upper-tail probability</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Degrees of Freedom</span>
+                        <span class="metric-value" id="metric-df">-</span>
+                        <span class="metric-sub">(r - 1) &times; (c - 1)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Cram&eacute;r's V (Effect Size)</span>
+                        <span class="metric-value" id="metric-cramers">-</span>
+                        <span class="metric-sub" id="metric-cramers-sub">Association strength [0, 1]</span>
+                    </div>
+                </div>
+
+                <!-- Programmatic Contingency Table -->
+                <div class="card">
+                    <div class="table-toolbar">
+                        <h3 style="margin: 0; border: 0; padding: 0;">Programmatic Contingency Table</h3>
+                        <div class="view-pills">
+                            <button class="pill-btn active" data-view="observed" type="button">Observed &amp; Marginals</button>
+                            <button class="pill-btn" data-view="expected" type="button">Expected (H<sub>0</sub>)</button>
+                            <button class="pill-btn" data-view="cond-y" type="button">Conditional P(F | X)</button>
+                            <button class="pill-btn" data-view="cond-x" type="button">Conditional P(X | F)</button>
+                            <button class="pill-btn" data-view="residuals" type="button">Std. Residuals</button>
+                        </div>
+                    </div>
+                    <div class="contingency-scroll">
+                        <table class="contingency-table" id="contingency-table"></table>
+                    </div>
+                </div>
+
+                <!-- 2x2 Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Observed vs. Expected Frequencies</h4>
+                            <span class="chart-tag">O<sub>ij</sub> vs E<sub>ij</sub></span>
+                        </div>
+                        <div id="chart-obs-exp" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Conditional Distribution Profiles</h4>
+                            <span class="chart-tag">P(F | X = x<sub>i</sub>)</span>
+                        </div>
+                        <div id="chart-cond-profiles" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Standardized Pearson Residuals</h4>
+                            <span class="chart-tag">(O<sub>ij</sub> - E<sub>ij</sub>) / &radic;E<sub>ij</sub></span>
+                        </div>
+                        <div id="chart-residuals" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-header">
+                            <h4 class="chart-title">&chi;&sup2; Distribution &amp; p-Value Region</h4>
+                            <span class="chart-tag">&chi;&sup2;<sub>df</sub> vs &chi;&sup2;<sub>obs</sub></span>
+                        </div>
+                        <div id="chart-chi2-dist" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- Theoretical Recall & Dynamic Conclusions -->
+                <div class="conclusion-card">
+                    <h3>Theoretical Concepts, Interpretation &amp; Causality Discussion</h3>
+
+                    <div class="conclusion-block">
+                        <h4>
+                            <span>1. Statistical &amp; Probabilistic Independence</span>
+                            <span class="badge">P(X = x<sub>i</sub>, F = y<sub>j</sub>) = P(X = x<sub>i</sub>) &sdot; P(F = y<sub>j</sub>)</span>
+                        </h4>
+                        <p>
+                            Two categorical variables <i>X</i> and <i>F</i> are <b>statistically independent</b> if and only if
+                            their joint probability distribution factors into the product of their marginal distributions for every
+                            pair of categories: <i>P(X = x<sub>i</sub>, F = y<sub>j</sub>) = P(X = x<sub>i</sub>) P(F = y<sub>j</sub>)</i>.
+                            Equivalently, knowing the value of <i>X</i> provides zero information about <i>F</i>, meaning the
+                            conditional distributions are identical across all rows:
+                            <i>P(F = y<sub>j</sub> | X = x<sub>i</sub>) = P(F = y<sub>j</sub>)</i>.
+                            Under this null hypothesis <i>H<sub>0</sub></i>, the expected cell frequency is
+                            <i>E<sub>ij</sub> = (R<sub>i</sub> &sdot; C<sub>j</sub>) / N</i>.
+                        </p>
+                    </div>
+
+                    <div class="conclusion-block">
+                        <h4>
+                            <span>2. Interpretation of the Chi-Square Test Results</span>
+                            <span class="badge" id="badge-conclusion-test">-</span>
+                        </h4>
+                        <p id="text-interpretation">-</p>
+                    </div>
+
+                    <div class="conclusion-block">
+                        <h4>
+                            <span>3. Statistical Association vs. Causality</span>
+                            <span class="badge">Correlation &ne; Causation</span>
+                        </h4>
+                        <p id="text-causality">-</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Theoretical Guide Modal -->
+    <div class="modal-backdrop" id="help-modal">
+        <div class="modal-box">
+            <h2>Theoretical Guide: Contingency Tables &amp; Chi-Square Independence</h2>
+
+            <h3>1. Marginal &amp; Conditional Frequencies</h3>
+            <ul>
+                <li><b>Marginal Frequencies:</b> Row totals <i>R<sub>i</sub> = &sum;<sub>j</sub> O<sub>ij</sub></i> and column totals <i>C<sub>j</sub> = &sum;<sub>i</sub> O<sub>ij</sub></i> describe the univariate distribution of each variable separately.</li>
+                <li><b>Conditional Frequencies:</b> <i>P(F = y<sub>j</sub> | X = x<sub>i</sub>) = O<sub>ij</sub> / R<sub>i</sub></i> measures how the distribution of <i>F</i> shifts within each subgroup of <i>X</i>.</li>
+            </ul>
+
+            <h3>2. Expected Frequencies &amp; Pearson's Chi-Square</h3>
+            <p>
+                Under independence <i>H<sub>0</sub></i>, expected counts are <b>E<sub>ij</sub> = (R<sub>i</sub> &sdot; C<sub>j</sub>) / N</b>.
+                Pearson's statistic measures the total normalized discrepancy between observed and expected counts:
+                <br>
+                &emsp;<b>&chi;&sup2; = &sum;<sub>i=1</sub><sup>r</sup> &sum;<sub>j=1</sub><sup>c</sup> (O<sub>ij</sub> - E<sub>ij</sub>)&sup2; / E<sub>ij</sub></b>
+                <br>
+                Asymptotically, &chi;&sup2; follows a Chi-Square distribution with <b>df = (r - 1)(c - 1)</b> degrees of freedom.
+                The exact p-value is computed via the regularized upper incomplete gamma function <b>Q(df/2, &chi;&sup2;/2)</b>.
+            </p>
+
+            <h3>3. Effect Size (Cram&eacute;r's V) &amp; Causality</h3>
+            <p>
+                Because &chi;&sup2; scales linearly with sample size <i>N</i>, even tiny deviations yield tiny p-values when <i>N</i> is large.
+                <b>Cram&eacute;r's V = &radic;(&chi;&sup2; / (N &sdot; min(r-1, c-1)))</b> normalizes association strength to [0, 1].
+                Finally, rejecting <i>H<sub>0</sub></i> establishes <i>statistical association</i>, never <i>causation</i>&mdash;hidden
+                confounders, reverse causality, or selection bias can induce strong dependence without any direct causal mechanism.
+            </p>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-primary" id="btn-close-modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/stats.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
+
