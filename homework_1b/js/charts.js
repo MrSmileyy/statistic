@@ -1,12 +1,12 @@
 /*
  * charts.js
- * Modulo per la generazione dei grafici statistici con Chart.js.
+ * Module for generating statistical charts with Chart.js.
  *
- * Include:
- *   1. Grafico 1: Distribuzione frequenze del Testo in Chiaro (vs teorica)
- *   2. Grafico 2: Distribuzione frequenze del Cifrato di Cesare (evidenzia la traslazione)
- *   3. Grafico 3: Distribuzione dei byte/nibble del Cifrato ECC (dimostra la planarita' pseudo-casuale)
- *   4. Grafico 4: Curva del test Chi-Quadro sui 25 shift (individuazione del minimo globale)
+ * Includes:
+ *   1. Chart 1: Plaintext frequency distribution (vs theoretical)
+ *   2. Chart 2: Caesar Ciphertext frequency distribution (highlights the shift)
+ *   3. Chart 3: ECC Ciphertext byte/nibble distribution (demonstrates pseudo-random flatness)
+ *   4. Chart 4: Chi-Squared test curve across all 25 shifts (identifying the global minimum)
  */
 
 const ChartsManager = (() => {
@@ -46,7 +46,7 @@ const ChartsManager = (() => {
                 labels: alphabetLabels,
                 datasets: [
                     {
-                        label: "Frequenza osservata (%)",
+                        label: "Observed frequency (%)",
                         data: dataEmpirical,
                         backgroundColor: "rgba(0, 68, 136, 0.75)",
                         borderColor: "#004488",
@@ -54,7 +54,7 @@ const ChartsManager = (() => {
                         borderRadius: 3
                     },
                     {
-                        label: "Frequenza teorica lingua (%)",
+                        label: "Theoretical language frequency (%)",
                         data: dataTheoretical,
                         type: "line",
                         borderColor: "#900000",
@@ -80,7 +80,7 @@ const ChartsManager = (() => {
                     x: { ticks: { font: defaultFont } },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: "Frequenza (%)", font: defaultFont },
+                        title: { display: true, text: "Frequency (%)", font: defaultFont },
                         ticks: { font: defaultFont }
                     }
                 }
@@ -88,7 +88,7 @@ const ChartsManager = (() => {
         });
     }
 
-    // 2. Grafico Cifrato di Cesare (Mostra lo shift rigido dei picchi)
+    // 2. Caesar Ciphertext Chart (Shows the rigid shift of peaks)
     function renderCaesarChart(canvasId, cipherText, shift) {
         destroyChart(chartCaesar);
         const ctx = document.getElementById(canvasId).getContext("2d");
@@ -101,7 +101,7 @@ const ChartsManager = (() => {
                 labels: alphabetLabels,
                 datasets: [
                     {
-                        label: `Frequenze Cesare (Shift k = ${shift})`,
+                        label: `Caesar Frequencies (Shift k = ${shift})`,
                         data: dataEmpirical,
                         backgroundColor: "rgba(211, 84, 0, 0.75)",
                         borderColor: "#d35400",
@@ -117,7 +117,7 @@ const ChartsManager = (() => {
                     legend: { labels: { font: defaultFont } },
                     tooltip: {
                         callbacks: {
-                            label: ctx => `Frequenza: ${ctx.parsed.y}%`
+                            label: ctx => `Frequency: ${ctx.parsed.y}%`
                         }
                     }
                 },
@@ -125,7 +125,7 @@ const ChartsManager = (() => {
                     x: { ticks: { font: defaultFont } },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: "Frequenza (%)", font: defaultFont },
+                        title: { display: true, text: "Frequency (%)", font: defaultFont },
                         ticks: { font: defaultFont }
                     }
                 }
@@ -133,13 +133,13 @@ const ChartsManager = (() => {
         });
     }
 
-    // 3. Grafico Cifrato ECC (Distribuzione dei caratteri esadecimali / byte)
-    // Mostra l'effetto dell'entropia crittografica: distribuzione appiattita e uniforme
+    // 3. ECC Ciphertext Chart (Distribution of hexadecimal characters / bytes)
+    // Shows the effect of cryptographic entropy: flattened and uniform distribution
     function renderECCChart(canvasId, cipherText) {
         destroyChart(chartECC);
         const ctx = document.getElementById(canvasId).getContext("2d");
 
-        // Analisi della distribuzione dei nibble esadecimali (0-9, a-f) nel cifrato
+        // Analysis of hexadecimal nibble distribution (0-9, a-f) in the ciphertext
         const hexChars = "0123456789abcdef".split("");
         const hexClean = cipherText.toLowerCase().replace(/[^0-9a-f]/g, "");
         const counts = {};
@@ -148,7 +148,7 @@ const ChartsManager = (() => {
 
         const totalHex = hexClean.length;
         const dataPercentages = hexChars.map(c => totalHex > 0 ? ((counts[c] / totalHex) * 100).toFixed(2) : 0);
-        // Frequenza ideale uniforme: 100 / 16 = 6.25%
+        // Ideal uniform frequency: 100 / 16 = 6.25%
         const uniformExpected = hexChars.map(() => (100 / 16).toFixed(2));
 
         chartECC = new Chart(ctx, {
@@ -157,7 +157,7 @@ const ChartsManager = (() => {
                 labels: hexChars.map(c => c.toUpperCase()),
                 datasets: [
                     {
-                        label: "Frequenza osservata esadecimali ECC (%)",
+                        label: "Observed ECC hexadecimal frequency (%)",
                         data: dataPercentages,
                         backgroundColor: "rgba(39, 174, 96, 0.75)",
                         borderColor: "#27ae60",
@@ -165,7 +165,7 @@ const ChartsManager = (() => {
                         borderRadius: 3
                     },
                     {
-                        label: "Distribuzione uniforme ideale (6.25%)",
+                        label: "Ideal uniform distribution (6.25%)",
                         data: uniformExpected,
                         type: "line",
                         borderColor: "#444",
@@ -191,7 +191,7 @@ const ChartsManager = (() => {
                     y: {
                         beginAtZero: true,
                         max: 15,
-                        title: { display: true, text: "Frequenza (%)", font: defaultFont },
+                        title: { display: true, text: "Frequency (%)", font: defaultFont },
                         ticks: { font: defaultFont }
                     }
                 }
@@ -199,12 +199,12 @@ const ChartsManager = (() => {
         });
     }
 
-    // 4. Grafico Statistico: Distanza Chi-Quadro per tutti i 25 shift
+    // 4. Statistical Chart: Chi-Squared Distance for all 25 shifts
     function renderChi2Chart(canvasId, scores, bestShift) {
         destroyChart(chartChi2);
         const ctx = document.getElementById(canvasId).getContext("2d");
 
-        // Ordiniamo per shift da 1 a 25 per visualizzare la curva continua
+        // Sort by shift from 1 to 25 to display the continuous curve
         const sortedByShift = [...scores].sort((a, b) => a.shift - b.shift);
         const labels = sortedByShift.map(s => `k = ${s.shift}`);
         const values = sortedByShift.map(s => s.chi2.toFixed(1));
@@ -217,7 +217,7 @@ const ChartsManager = (() => {
                 labels,
                 datasets: [
                     {
-                        label: "Valore Chi-Quadro per shift candidato",
+                        label: "Chi-Squared value per candidate shift",
                         data: values,
                         backgroundColor: colors,
                         borderColor: borderColors,
@@ -233,7 +233,7 @@ const ChartsManager = (() => {
                     legend: { labels: { font: defaultFont } },
                     tooltip: {
                         callbacks: {
-                            label: ctx => `Distanza Chi-Quadro: ${ctx.parsed.y}`
+                            label: ctx => `Chi-Squared Distance: ${ctx.parsed.y}`
                         }
                     }
                 },
@@ -241,7 +241,7 @@ const ChartsManager = (() => {
                     x: { ticks: { font: { ...defaultFont, size: 9 }, maxRotation: 45 } },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: "Distanza Chi-Quadro", font: defaultFont },
+                        title: { display: true, text: "Chi-Squared Distance", font: defaultFont },
                         ticks: { font: defaultFont }
                     }
                 }

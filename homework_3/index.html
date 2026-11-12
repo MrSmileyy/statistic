@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homework 3: Calcolo Incrementale (Welford) &amp; Campionamento Statistico</title>
+    <title>Homework 3: Welford Incremental Variance &amp; Statistical Sampling</title>
     <meta name="description"
-        content="Implementazione delle formule di Welford/Knuth a 3 righe, simulazione multi-hacker, correttezza degli stimatori e convergenza asintotica (LLN e TLC).">
+        content="Implementation of the 3-line Welford/Knuth recurrence formulas, multi-hacker penetration simulation, unbiasedness of estimators, and asymptotic convergence (LLN & CLT).">
     <link rel="stylesheet" href="style/style.css">
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
@@ -15,145 +15,126 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <a href="../index.html" class="back-link" title="Torna all'indice generale">
+                <a href="../index.html" class="back-link" title="Back to main index">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
-                    <span>Indice</span>
+                    <span>Index</span>
                 </a>
-                <h1>Homework 3: Calcolo Incrementale di Welford &amp; Campionamento Statistico</h1>
-                <p class="subtitle">Formule ricorsive di Knuth, simulazione multi-hacker e proprietà di correttezza
-                    degli stimatori</p>
+                <h1>Homework 3: Welford Incremental Computation &amp; Statistical Sampling</h1>
+                <p class="subtitle">Knuth recursive formulas, multi-hacker simulation, and unbiasedness properties of sample estimators</p>
             </div>
             <div>
-                <button id="btn-help" class="btn btn-secondary" type="button">? Spiegazione Teorica</button>
+                <button id="btn-help" class="btn btn-secondary" type="button">? Theoretical Explanation</button>
             </div>
         </header>
 
-        <!-- Selettore Tab -->
-        <nav class="nav-tabs" aria-label="Sezioni esercitazione">
+        <!-- Tab Selector -->
+        <nav class="nav-tabs" aria-label="Homework sections">
             <button class="tab-btn" data-tab="pane-ex1" type="button">
-                Esercizio 1: Algoritmo di Welford (Core &amp; Stabilità)
+                Exercise 1: Welford's Algorithm (Core &amp; Stability)
             </button>
             <button class="tab-btn active" data-tab="pane-ex2" type="button">
-                Esercizio 2: Simulazione Statistica Hacker (m &amp; n)
+                Exercise 2: Hacker Statistical Simulation (m &amp; n)
             </button>
         </nav>
 
         <!-- ========================================== -->
-        <!-- ESERCIZIO 1: FORMULE DI WELFORD/KNUTH -->
+        <!-- PANE EXERCISE 1: WELFORD/KNUTH FORMULAS    -->
         <!-- ========================================== -->
         <section id="pane-ex1" class="tab-pane">
             <div class="welford-grid">
-                <!-- MENU CONTROLLI-->
+                <!-- Left Column: Code & Mathematical Exposition -->
                 <div class="card card-accent">
-                    <h3>1. Logica Core &amp; Formulazione di Knuth</h3>
+                    <h3>1. Core Logic &amp; Knuth's Formulation</h3>
                     <p class="small-text">
-                        Nel calcolo sequenziale o in streaming della varianza, l'uso della classica formula da manuale
-                        <i>Var = (&sum; x<sup>2</sup> - (&sum; x)<sup>2</sup>/n) / (n - 1)</i> &egrave; altamente
-                        vulnerabile
-                        al fenomeno di <b>cancellazione catastrofica</b> per sottrazione in virgola mobile standard IEEE
-                        754.
+                        In sequential or streaming variance computation, using the textbook formula
+                        <i>Var = (&sum; x<sup>2</sup> - (&sum; x)<sup>2</sup>/n) / (n - 1)</i> is highly vulnerable
+                        to <b>catastrophic cancellation</b> due to subtraction in standard IEEE 754 floating-point arithmetic.
                     </p>
                     <p class="small-text">
-                        L'algoritmo di B.P. Welford (1962), ripreso e sintetizzato magistralmente da Donald Knuth
-                        (<i>The Art of Computer Programming</i>, Vol. 2), risolve il problema aggiornando la media e
-                        la somma dei quadrati degli scarti (<i>M<sub>2</sub> = SS</i>) in un unico passaggio <b>O(1)
-                            spazio</b>
-                        attraverso esattamente <b>3 righe di codice</b>:
+                        B.P. Welford's algorithm (1962), refined by Donald Knuth
+                        (<i>The Art of Computer Programming</i>, Vol. 2), solves this by updating the mean and
+                        the sum of squared deviations (<i>M<sub>2</sub> = SS</i>) in a single pass with <b>O(1) space</b>
+                        using exactly <b>3 lines of code</b>:
                     </p>
 
                     <div class="code-box">
-                        <span class="com">// Blocco di aggiornamento Knuth/Welford (3 righe pure)</span>
-                        <span class="highlight-line"><span class="kw">const</span> <span class="var">delta</span> <span
-                                class="op">=</span> <span class="var">x</span> <span class="op">-</span> <span
-                                class="var">mean</span>;</span>
-                        <span class="highlight-line"><span class="var">mean</span> <span class="op">+=</span> <span
-                                class="var">delta</span> <span class="op">/</span> <span
-                                class="var">count</span>;</span>
-                        <span class="highlight-line"><span class="var">M2</span> <span class="op">+=</span> <span
-                                class="var">delta</span> <span class="op">*</span> (<span class="var">x</span> <span
-                                class="op">-</span> <span class="var">mean</span>);</span>
+<span class="com">// Knuth/Welford update block (3 pure lines)</span>
+<span class="highlight-line"><span class="kw">const</span> <span class="var">delta</span> <span class="op">=</span> <span class="var">x</span> <span class="op">-</span> <span class="var">mean</span>;</span>
+<span class="highlight-line"><span class="var">mean</span> <span class="op">+=</span> <span class="var">delta</span> <span class="op">/</span> <span class="var">count</span>;</span>
+<span class="highlight-line"><span class="var">M2</span> <span class="op">+=</span> <span class="var">delta</span> <span class="op">*</span> (<span class="var">x</span> <span class="op">-</span> <span class="var">mean</span>);</span>
 
-                        <span class="com">// Varianza campionaria corretta (Bessel n - 1):</span>
-                        <span class="kw">const</span> <span class="var">sampleVariance</span> <span class="op">=</span>
-                        <span class="var">count</span> <span class="op">&gt;</span> <span class="num">1</span> <span
-                            class="op">?</span> <span class="var">M2</span> <span class="op">/</span> (<span
-                            class="var">count</span> <span class="op">-</span> <span class="num">1</span>) <span
-                            class="op">:</span> <span class="num">0</span>;
+<span class="com">// Unbiased sample variance (Bessel's correction n - 1):</span>
+<span class="kw">const</span> <span class="var">sampleVariance</span> <span class="op">=</span> <span class="var">count</span> <span class="op">&gt;</span> <span class="num">1</span> <span class="op">?</span> <span class="var">M2</span> <span class="op">/</span> (<span class="var">count</span> <span class="op">-</span> <span class="num">1</span>) <span class="op">:</span> <span class="num">0</span>;
                     </div>
 
                     <h4 style="font-family: var(--font-ui); font-size: 0.95rem; margin-top: 14px; margin-bottom: 6px;">
-                        Relazioni di Ricorrenza Analitiche:
+                        Analytical Recurrence Relations:
                     </h4>
                     <table class="stats-table">
                         <tbody>
                             <tr>
-                                <td>Scarto dal centro precedente:</td>
+                                <td>Deviation from previous mean:</td>
                                 <td class="mono">&delta;<sub>k</sub> = x<sub>k</sub> - &mu;<sub>k-1</sub></td>
                             </tr>
                             <tr>
-                                <td>Aggiornamento media:</td>
+                                <td>Mean update:</td>
                                 <td class="mono">&mu;<sub>k</sub> = &mu;<sub>k-1</sub> + &delta;<sub>k</sub> / k</td>
                             </tr>
                             <tr>
-                                <td>Aggiornamento SS (M<sub>2</sub>):</td>
-                                <td class="mono">M<sub>2,k</sub> = M<sub>2,k-1</sub> + &delta;<sub>k</sub> &sdot;
-                                    (x<sub>k</sub> - &mu;<sub>k</sub>)</td>
+                                <td>SS (M<sub>2</sub>) update:</td>
+                                <td class="mono">M<sub>2,k</sub> = M<sub>2,k-1</sub> + &delta;<sub>k</sub> &sdot; (x<sub>k</sub> - &mu;<sub>k</sub>)</td>
                             </tr>
                             <tr>
-                                <td>Stima non distorta di &sigma;<sup>2</sup>:</td>
+                                <td>Unbiased estimator of &sigma;<sup>2</sup>:</td>
                                 <td class="mono">s<sup>2</sup><sub>k</sub> = M<sub>2,k</sub> / (k - 1)</td>
                             </tr>
                         </tbody>
                     </table>
 
                     <p class="small-text" style="margin-top: 12px;">
-                        <b>Nota tecnica:</b> Si osservi che nella terza riga il termine <code>(x - mean)</code> impiega
-                        la
-                        media <i>appena aggiornata</i> &mu;<sub>k</sub>. L'identit&agrave; algebrica
-                        &delta;<sub>k</sub> &sdot; (x<sub>k</sub> - &mu;<sub>k</sub>) = (x<sub>k</sub> -
-                        &mu;<sub>k-1</sub>)(x<sub>k</sub> - &mu;<sub>k</sub>)
-                        garantisce la massima precisione numerica senza richiedere due passate sui dati.
+                        <b>Technical note:</b> In the third line, the term <code>(x - mean)</code> uses the
+                        <i>newly updated</i> mean &mu;<sub>k</sub>. The algebraic identity
+                        &delta;<sub>k</sub> &sdot; (x<sub>k</sub> - &mu;<sub>k</sub>) = (x<sub>k</sub> - &mu;<sub>k-1</sub>)(x<sub>k</sub> - &mu;<sub>k</sub>)
+                        guarantees maximum numerical precision without requiring two passes over the data.
                     </p>
                 </div>
 
-                <!-- GRAFICI INTERATTIVI -->
+                <!-- Right Column: Interactive Streaming Testbench -->
                 <div class="card">
-                    <h3>Accumulatore Interattivo Passo-Passo</h3>
+                    <h3>Interactive Step-by-Step Accumulator</h3>
                     <p class="small-text">
-                        Aggiungi singole osservazioni o sequenze per osservare lo stato interno dei registri di Welford:
+                        Add individual observations or batches to inspect the internal state of Welford's registers:
                     </p>
 
                     <div class="stream-controls">
-                        <input type="number" id="input-single-val" class="custom-input" placeholder="Valore" value="7"
-                            step="any">
-                        <button id="btn-add-val" class="btn btn-secondary" type="button">+ Aggiungi Valore</button>
-                        <button id="btn-add-random" class="btn btn-secondary" type="button">Casuale [0, 10]</button>
-                        <button id="btn-add-ten" class="btn btn-secondary" type="button">+10 Campioni</button>
-                        <button id="btn-test-stability" class="btn btn-primary" type="button">Test Instabilit&agrave;
-                            Na&iuml;ve</button>
-                        <button id="btn-reset-welford" class="btn btn-secondary" type="button">Resetta</button>
+                        <input type="number" id="input-single-val" class="custom-input" placeholder="Value" value="7" step="any">
+                        <button id="btn-add-val" class="btn btn-secondary" type="button">+ Add Value</button>
+                        <button id="btn-add-random" class="btn btn-secondary" type="button">Random [0, 10]</button>
+                        <button id="btn-add-ten" class="btn btn-secondary" type="button">+10 Samples</button>
+                        <button id="btn-test-stability" class="btn btn-primary" type="button">Test Na&iuml;ve Instability</button>
+                        <button id="btn-reset-welford" class="btn btn-secondary" type="button">Reset</button>
                     </div>
 
-                    <!-- Stato Corrente -->
+                    <!-- Current State -->
                     <div class="metrics-bar" style="margin-bottom: 14px;">
                         <div class="metric-card">
-                            <span class="metric-label">Campioni (k)</span>
+                            <span class="metric-label">Samples (k)</span>
                             <span class="metric-value" id="wf-count">0</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Media &mu;<sub>k</sub></span>
+                            <span class="metric-label">Mean &mu;<sub>k</sub></span>
                             <span class="metric-value" id="wf-mean">0.000</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Somma Quadrati (M<sub>2</sub>)</span>
+                            <span class="metric-label">Sum of Squares (M<sub>2</sub>)</span>
                             <span class="metric-value" id="wf-m2">0.000</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Varianza s<sup>2</sup></span>
+                            <span class="metric-label">Sample Variance s<sup>2</sup></span>
                             <span class="metric-value" id="wf-var">0.000</span>
                         </div>
                     </div>
@@ -161,7 +142,7 @@
                     <div id="stability-output" style="display: none;" class="benchmark-result"></div>
 
                     <h4 style="font-family: var(--font-ui); font-size: 0.92rem; margin: 12px 0 6px 0;">
-                        Cronologia Aggiornamenti Incrementali:
+                        Incremental Update History:
                     </h4>
                     <div class="stream-table-container">
                         <table class="stream-table">
@@ -178,7 +159,7 @@
                             <tbody id="stream-history-body">
                                 <tr>
                                     <td colspan="6" style="text-align: center; color: #888;">
-                                        Nessuna osservazione accumulata. Inserisci un valore o genera dati casuali.
+                                        No observations accumulated. Enter a value or generate random samples.
                                     </td>
                                 </tr>
                             </tbody>
@@ -189,30 +170,30 @@
         </section>
 
         <!-- ==================================================== -->
-        <!-- ESERCIZIO 2: SIMULAZIONE MULTI-HACKER E RISULTATI -->
+        <!-- PANE EXERCISE 2: MULTI-HACKER SIMULATION & RESULTS   -->
         <!-- ==================================================== -->
         <section id="pane-ex2" class="tab-pane active">
             <div class="layout">
-                <!-- Sidebar Parametri di Simulazione -->
+                <!-- Sidebar Parameters -->
                 <aside class="sidebar">
                     <div class="card">
-                        <h3>Parametri Simulazione</h3>
+                        <h3>Simulation Parameters</h3>
 
-                        <label class="input-header">Distribuzione Punteggio Penetrazione [0, 10]:</label>
+                        <label class="input-header">Penetration Score Distribution [0, 10]:</label>
                         <div class="radio-group">
                             <label class="radio-card active">
                                 <input type="radio" name="dist-type" value="uniform" checked>
-                                <span>Uniforme {0..10}</span>
+                                <span>Uniform {0..10}</span>
                             </label>
                             <label class="radio-card">
                                 <input type="radio" name="dist-type" value="binomial">
-                                <span>Binomiale (10, 0.5)</span>
+                                <span>Binomial (10, 0.5)</span>
                             </label>
                         </div>
 
                         <div class="input-row">
                             <div class="input-header">
-                                <label for="input-n">Sistemi attaccati per hacker (n):</label>
+                                <label for="input-n">Attacked systems per hacker (n):</label>
                             </div>
                             <div class="slider-container">
                                 <input type="range" id="range-n" min="10" max="2000" step="10" value="200">
@@ -222,7 +203,7 @@
 
                         <div class="input-row">
                             <div class="input-header">
-                                <label for="input-m">Numero di hacker / campioni (m):</label>
+                                <label for="input-m">Number of hackers / samples (m):</label>
                             </div>
                             <div class="slider-container">
                                 <input type="range" id="range-m" min="10" max="1000" step="10" value="150">
@@ -231,49 +212,45 @@
                         </div>
 
                         <button id="btn-run" class="btn btn-primary btn-full" type="button">
-                            Esegui Simulazione
+                            Run Simulation
                         </button>
 
                         <div class="preset-group">
-                            <button class="btn-chip" data-preset="small-n" type="button">Piccolo n (n=20,
-                                m=250)</button>
-                            <button class="btn-chip" data-preset="medium-n" type="button">Campione Medio (n=200,
-                                m=150)</button>
-                            <button class="btn-chip" data-preset="large-n" type="button">Grande n (n=800,
-                                m=300)</button>
-                            <button class="btn-chip" data-preset="massive" type="button">Massimo (n=1500,
-                                m=500)</button>
+                            <button class="btn-chip" data-preset="small-n" type="button">Small n (n=20, m=250)</button>
+                            <button class="btn-chip" data-preset="medium-n" type="button">Medium Sample (n=200, m=150)</button>
+                            <button class="btn-chip" data-preset="large-n" type="button">Large n (n=800, m=300)</button>
+                            <button class="btn-chip" data-preset="massive" type="button">Massive (n=1500, m=500)</button>
                         </div>
                     </div>
 
-                    <!-- Parametri Teorici -->
+                    <!-- Theoretical Moments -->
                     <div class="card card-accent">
-                        <h3>Momenti Teorici Popolazione</h3>
-                        <p class="small-text">Parametri esatti della distribuzione del punteggio:</p>
+                        <h3>Theoretical Population Moments</h3>
+                        <p class="small-text">Exact analytical parameters of the score distribution:</p>
                         <table class="stats-table">
                             <tbody>
                                 <tr>
-                                    <td>Modello di probabilit&agrave;:</td>
+                                    <td>Probability model:</td>
                                     <td id="theory-dist-name" class="mono">U{0, 10}</td>
                                 </tr>
                                 <tr>
-                                    <td>Media teorica (&mu;):</td>
+                                    <td>Theoretical mean (&mu;):</td>
                                     <td id="theory-mu" class="mono">5.000</td>
                                 </tr>
                                 <tr>
-                                    <td>Varianza teorica (&sigma;<sup>2</sup>):</td>
+                                    <td>Theoretical variance (&sigma;<sup>2</sup>):</td>
                                     <td id="theory-sigma2" class="mono">10.000</td>
                                 </tr>
                                 <tr>
-                                    <td>Deviazione standard (&sigma;):</td>
+                                    <td>Standard deviation (&sigma;):</td>
                                     <td id="theory-sigma" class="mono">3.162</td>
                                 </tr>
                                 <tr>
-                                    <td>Var. media campionaria (&sigma;<sup>2</sup>/n):</td>
+                                    <td>Sample mean var. (&sigma;<sup>2</sup>/n):</td>
                                     <td id="theory-mean-var" class="mono">-</td>
                                 </tr>
                                 <tr>
-                                    <td>Errore standard (SE = &sigma;/&radic;n):</td>
+                                    <td>Standard error (SE = &sigma;/&radic;n):</td>
                                     <td id="theory-se" class="mono">-</td>
                                 </tr>
                             </tbody>
@@ -281,153 +258,124 @@
                     </div>
                 </aside>
 
-                <!-- Area Contenuti Grafici e Dashboard -->
+                <!-- Main Dashboard & Charts -->
                 <main class="content">
-                    <!-- Barra Metriche di Sintesi -->
+                    <!-- Summary Metrics Bar -->
                     <div class="metrics-bar">
                         <div class="metric-card">
-                            <span class="metric-label">Media delle Medie (X&#772;&#772;)</span>
+                            <span class="metric-label">Mean of Means (X&#772;&#772;)</span>
                             <span class="metric-value" id="metric-mean-means">-</span>
-                            <span class="metric-sub" id="metric-sub-mu">Atteso &mu; = 5.000</span>
+                            <span class="metric-sub" id="metric-sub-mu">Expected &mu; = 5.000</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Media delle Varianze (S&#772;<sup>2</sup>)</span>
+                            <span class="metric-label">Mean of Variances (S&#772;<sup>2</sup>)</span>
                             <span class="metric-value" id="metric-mean-vars">-</span>
-                            <span class="metric-sub" id="metric-sub-sigma2">Atteso &sigma;<sup>2</sup> = 10.000</span>
+                            <span class="metric-sub" id="metric-sub-sigma2">Expected &sigma;<sup>2</sup> = 10.000</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Varianza Medie Var(X&#772;)</span>
+                            <span class="metric-label">Variance of Means Var(X&#772;)</span>
                             <span class="metric-value" id="metric-var-means">-</span>
-                            <span class="metric-sub" id="metric-sub-mean-var">Decadimento &sigma;<sup>2</sup>/n</span>
+                            <span class="metric-sub" id="metric-sub-mean-var">Decay &sigma;<sup>2</sup>/n</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Tempo di Calcolo</span>
+                            <span class="metric-label">Computation Time</span>
                             <span class="metric-value" id="metric-time">-</span>
-                            <span class="metric-sub">Aggiornamenti Welford</span>
+                            <span class="metric-sub">Welford updates</span>
                         </div>
                     </div>
 
-                    <!-- Griglia 4 Grafici Interattivi -->
+                    <!-- 2x2 Charts Grid -->
                     <div class="charts-grid">
-                        <!-- Grafico 1: Traiettorie Medie Cumulative -->
                         <div class="chart-wrapper">
                             <div class="chart-header">
-                                <h4 class="chart-title">Traiettorie Medie Cumulative nel Tempo</h4>
+                                <h4 class="chart-title">Cumulative Mean Trajectories Over Time</h4>
                                 <span class="chart-tag">t &in; [1, n] &rarr; X&#772;<sub>i,t</sub></span>
                             </div>
                             <div id="chart-mean-paths" class="chart-container"></div>
                         </div>
 
-                        <!-- Grafico 2: Traiettorie Varianze Cumulative -->
                         <div class="chart-wrapper">
                             <div class="chart-header">
-                                <h4 class="chart-title">Traiettorie Varianze Cumulative (Welford)</h4>
+                                <h4 class="chart-title">Cumulative Variance Trajectories (Welford)</h4>
                                 <span class="chart-tag">t &in; [2, n] &rarr; S<sup>2</sup><sub>i,t</sub></span>
                             </div>
                             <div id="chart-var-paths" class="chart-container"></div>
                         </div>
 
-                        <!-- Grafico 3: Distribuzione Finale Medie Campionarie -->
                         <div class="chart-wrapper">
                             <div class="chart-header">
-                                <h4 class="chart-title">Distribuzione Medie Campionarie Finali</h4>
+                                <h4 class="chart-title">Final Sample Means Distribution</h4>
                                 <span class="chart-tag">X&#772;<sub>i</sub> vs &Nu;(&mu;, &sigma;<sup>2</sup>/n)</span>
                             </div>
                             <div id="chart-means-dist" class="chart-container"></div>
                         </div>
 
-                        <!-- Grafico 4: Distribuzione Finale Varianze Campionarie -->
                         <div class="chart-wrapper">
                             <div class="chart-header">
-                                <h4 class="chart-title">Distribuzione Varianze Campionarie Finali</h4>
+                                <h4 class="chart-title">Final Sample Variances Distribution</h4>
                                 <span class="chart-tag">S<sup>2</sup><sub>i</sub> vs &sigma;<sup>2</sup></span>
                             </div>
                             <div id="chart-vars-dist" class="chart-container"></div>
                         </div>
                     </div>
 
-                    <!-- Sezione Conclusioni e Analisi Dinamica -->
+                    <!-- Dynamic Conclusions Section -->
                     <div class="conclusion-card">
-                        <h3>Analisi Dinamica dei Risultati &amp; Conclusioni Teoriche</h3>
+                        <h3>Dynamic Results Analysis &amp; Theoretical Conclusions</h3>
 
                         <div class="conclusion-block">
                             <h4>
-                                <span>1. Propriet&agrave; di Correttezza degli Stimatori (Unbiasedness)</span>
-                                <span class="badge" id="badge-unbiased">E[X&#772;] = &mu; &amp; E[S<sup>2</sup>] =
-                                    &sigma;<sup>2</sup></span>
+                                <span>1. Unbiasedness of Estimators</span>
+                                <span class="badge" id="badge-unbiased">E[X&#772;] = &mu; &amp; E[S<sup>2</sup>] = &sigma;<sup>2</sup></span>
                             </h4>
                             <p id="text-unbiased">
-                                In questa simulazione, ciascuno degli <span class="highlight-val" id="dyn-m">-</span>
-                                hacker ha attaccato
-                                <span class="highlight-val" id="dyn-n">-</span> sistemi indipendenti.
-                                Poich&eacute; il valore atteso della somma di variabili aleatorie &egrave; lineare, la
-                                media campionaria
-                                possiede valore atteso esattamente pari a &mu;: <i>E[X&#772;<sub>i</sub>] = &mu; = <span
-                                        id="dyn-mu-val">5.0</span></i>.
-                                Conseguentemente, aggregando tutti gli hacker, la media delle medie campionarie
-                                calcolata &egrave;
-                                <span class="highlight-val" id="dyn-mean-means-val">-</span>, con uno scarto
-                                trascurabile di soli
-                                <span class="highlight-val" id="dyn-mean-err">-</span> rispetto a &mu;.
-                                Analogamente, la varianza campionaria calcolata con l'algoritmo di Welford adotta la
-                                correzione di Bessel
-                                con divisore <i>(n - 1)</i> per compensare il grado di libert&agrave; consumato nella
-                                stima della media,
-                                garantendo la non distorsione: <i>E[S<sup>2</sup>] = &sigma;<sup>2</sup> = <span
-                                        id="dyn-sigma2-val">10.0</span></i>.
-                                Empiricamente, la media delle varianze campionarie risulta <span class="highlight-val"
-                                    id="dyn-mean-vars-val">-</span>,
-                                con una discrepanza empirica pari a <span class="highlight-val"
-                                    id="dyn-var-err">-</span>.
+                                In this simulation, each of the <span class="highlight-val" id="dyn-m">-</span> hackers attacked
+                                <span class="highlight-val" id="dyn-n">-</span> independent systems.
+                                By linearity of expectation, the sample mean has expected value equal to &mu;:
+                                <i>E[X&#772;<sub>i</sub>] = &mu; = <span id="dyn-mu-val">5.0</span></i>.
+                                Consequently, aggregating across all hackers, the mean of sample means is
+                                <span class="highlight-val" id="dyn-mean-means-val">-</span>, with a negligible deviation of
+                                <span class="highlight-val" id="dyn-mean-err">-</span> from &mu;.
+                                Similarly, the sample variance computed via Welford's algorithm uses Bessel's correction
+                                with divisor <i>(n - 1)</i> to compensate for the degree of freedom lost when estimating the mean,
+                                guaranteeing unbiasedness: <i>E[S<sup>2</sup>] = &sigma;<sup>2</sup> = <span id="dyn-sigma2-val">10.0</span></i>.
+                                Empirically, the mean of sample variances is <span class="highlight-val" id="dyn-mean-vars-val">-</span>,
+                                with an observed discrepancy of <span class="highlight-val" id="dyn-var-err">-</span>.
                             </p>
                         </div>
 
                         <div class="conclusion-block">
                             <h4>
-                                <span>2. Utilit&agrave; nella Statistica Inferenziale</span>
-                                <span class="badge">Inferenza di Popolazione</span>
+                                <span>2. Utility in Inferential Statistics</span>
+                                <span class="badge">Population Inference</span>
                             </h4>
                             <p>
-                                Nella statistica inferenziale applicata (e nell'analisi della sicurezza informatica), i
-                                parametri reali
-                                &mu; e &sigma;<sup>2</sup> di un sistema o di una classe di vulnerabilit&agrave; non
-                                sono noti a priori.
-                                La correttezza di X&#772; e S<sup>2</sup> garantisce che il ricercatore o l'analista
-                                possa fidarsi
-                                pienamente delle stime campionarie: non vi &egrave; alcuna sovrastima o sottostima
-                                sistematica del rischio.
-                                Inoltre, l'algoritmo di Welford rende possibile l'elaborazione di telemetrie di
-                                sicurezza in streaming continuo,
-                                aggiornando la stima del rischio in tempo reale a costo computazionale O(1) e con
-                                immunit&agrave; totale
-                                agli errori di cancellazione numerica tipici dei sistemi ad alto throughput.
+                                In applied inferential statistics (and cybersecurity risk analysis), the true population
+                                parameters &mu; and &sigma;<sup>2</sup> of a system or vulnerability class are unknown a priori.
+                                The unbiasedness of X&#772; and S<sup>2</sup> guarantees that analysts can rely on sample
+                                estimates without systematic over- or under-estimation of risk.
+                                Furthermore, Welford's algorithm enables real-time streaming processing of security telemetry,
+                                updating risk estimates at <i>O(1)</i> computational cost with complete immunity to
+                                floating-point cancellation errors.
                             </p>
                         </div>
 
                         <div class="conclusion-block">
                             <h4>
-                                <span>3. Effetto dell'Aumento di n e Legge dei Grandi Numeri (LLN)</span>
+                                <span>3. Effect of Increasing n &amp; Law of Large Numbers (LLN)</span>
                                 <span class="badge" id="badge-lln">Var(X&#772;) = &sigma;<sup>2</sup>/n &rarr; 0</span>
                             </h4>
                             <p id="text-lln">
-                                Aumentando la dimensione campionaria <i>n</i> da valori ridotti ad ampi, la
-                                variabilit&agrave; delle stime
-                                individuali tra i singoli hacker si riduce drasticamente.
-                                La varianza teorica della media campionaria &egrave; inversamente proporzionale a
-                                <i>n</i>:
+                                Increasing the sample size <i>n</i> dramatically reduces the variability of individual
+                                estimates across hackers.
+                                The theoretical variance of the sample mean is inversely proportional to <i>n</i>:
                                 <i>Var(X&#772;) = &sigma;<sup>2</sup> / n = <span id="dyn-theory-varmeans">-</span></i>
-                                (con deviazione standard / errore standard <i>SE = &sigma; / &radic;n = <span
-                                        id="dyn-theory-se">-</span></i>).
-                                Nella nostra simulazione empirica, la varianza osservata tra le medie degli hacker
-                                &egrave; pari a
+                                (with standard error <i>SE = &sigma; / &radic;n = <span id="dyn-theory-se">-</span></i>).
+                                In our empirical simulation, the observed variance across hacker means is
                                 <span class="highlight-val" id="dyn-emp-varmeans">-</span>.
-                                Graficamente, questo fenomeno si manifesta chiaramente nel grafico in alto a sinistra:
-                                le traiettorie
-                                temporali si stringono come un imbuto convergente attorno alla linea teorica &mu;, e
-                                l'istogramma delle medie
-                                si restringe in un picco sempre pi&ugrave; concentrato (convergenza quasi certa e in
-                                probabilit&agrave;
-                                sancita dalla Legge dei Grandi Numeri e Teorema del Limite Centrale).
+                                Visually, this appears in the top-left chart as a narrowing funnel converging onto the
+                                theoretical line &mu;, while the sample means histogram sharpens into a concentrated peak
+                                (almost sure convergence and convergence in probability via the Law of Large Numbers and Central Limit Theorem).
                             </p>
                         </div>
                     </div>
@@ -436,104 +384,80 @@
         </section>
     </div>
 
-    <!-- Modale Spiegazione Teorica -->
+    <!-- Theoretical Explanation Modal -->
     <div class="modal-backdrop" id="help-modal">
         <div class="modal-box">
-            <h2>Approfondimento Teorico: Welford, Knuth e Campionamento</h2>
+            <h2>Theoretical Deep Dive: Welford, Knuth, and Sampling</h2>
 
-            <h3>1. L'Algoritmo di Welford e la Formulazione di Knuth</h3>
+            <h3>1. Welford's Algorithm and Knuth's Formulation</h3>
             <p>
-                La formula algebrica standard per la somma dei quadrati degli scarti &egrave;
+                The standard algebraic textbook formula for the sum of squared deviations is
                 <i>SS = &sum; x<sub>i</sub><sup>2</sup> - (&sum; x<sub>i</sub>)<sup>2</sup> / n</i>.
-                Sebbene matematicamente equivalente alla definizione <i>&sum; (x<sub>i</sub> - &mu;)<sup>2</sup></i>,
-                dal punto di vista
-                dell'aritmetica floating point a precisione finita (IEEE 754) essa comporta la sottrazione tra due
-                numeri estremamente
-                grandi di ordine di grandezza simile quando il dataset ha valori con media elevata rispetto alla
-                varianza.
-                Questo causa una drammatica perdita di cifre significative nota come <b>cancellazione catastrofica</b>,
-                che pu&ograve;
-                persino produrre varianze negative o azzerate.
+                Although mathematically equivalent to <i>&sum; (x<sub>i</sub> - &mu;)<sup>2</sup></i>, in finite-precision
+                IEEE 754 floating-point arithmetic it subtracts two huge numbers of nearly equal magnitude when the data
+                mean is large relative to its variance. This causes <b>catastrophic cancellation</b>, potentially yielding
+                zero or even negative variances.
             </p>
             <p>
-                B.P. Welford (1962) introdusse un metodo ricorsivo a singolo passaggio dimostrato e perfezionato da
-                Donald Knuth.
-                Denotando con &mu;<sub>k</sub> la media dei primi <i>k</i> elementi e con <i>M<sub>2,k</sub></i> la
-                somma dei quadrati
-                degli scarti:
+                B.P. Welford (1962) introduced a single-pass recursive method refined by Donald Knuth.
+                Denoting &mu;<sub>k</sub> as the mean of the first <i>k</i> elements and <i>M<sub>2,k</sub></i> as the
+                sum of squared deviations:
                 <br>
                 &emsp;<b>&delta;<sub>k</sub> = x<sub>k</sub> - &mu;<sub>k-1</sub></b>
                 <br>
                 &emsp;<b>&mu;<sub>k</sub> = &mu;<sub>k-1</sub> + &delta;<sub>k</sub> / k</b>
                 <br>
-                &emsp;<b>M<sub>2,k</sub> = M<sub>2,k-1</sub> + &delta;<sub>k</sub> &sdot; (x<sub>k</sub> -
-                    &mu;<sub>k</sub>)</b>
+                &emsp;<b>M<sub>2,k</sub> = M<sub>2,k-1</sub> + &delta;<sub>k</sub> &sdot; (x<sub>k</sub> - &mu;<sub>k</sub>)</b>
                 <br>
-                La varianza campionaria non distorta &egrave; quindi semplicemente <b>s<sup>2</sup> = M<sub>2,k</sub> /
-                    (k - 1)</b>.
+                The unbiased sample variance is then simply <b>s<sup>2</sup> = M<sub>2,k</sub> / (k - 1)</b>.
             </p>
 
-            <h3>2. La Correzione di Bessel (Divisore n - 1)</h3>
+            <h3>2. Bessel's Correction (Divisor n - 1)</h3>
             <p>
-                Quando stimiamo la varianza della popolazione &sigma;<sup>2</sup> a partire da un campione, non
-                conosciamo la vera media
-                &mu;, ma la sostituiamo con la media campionaria X&#772;. Poich&eacute; X&#772; &egrave; calcolata
-                proprio minimizzando
-                la somma dei quadrati delle distanze dai dati campionari, la quantit&agrave; <i>&sum; (X<sub>i</sub> -
-                    X&#772;)<sup>2</sup></i>
-                tende sistematicamente a sottostimare la dispersione rispetto alla vera media &mu;.
-                In particolare, si dimostra che:
+                When estimating population variance &sigma;<sup>2</sup> from a sample, we replace the unknown true mean
+                &mu; with the sample mean X&#772;. Because X&#772; minimizes the sum of squared distances from the sample
+                points, <i>&sum; (X<sub>i</sub> - X&#772;)<sup>2</sup></i> systematically underestimates the dispersion
+                around &mu;:
                 <br>
-                &emsp;<b>E[&sum; (X<sub>i</sub> - X&#772;)<sup>2</sup> / n] = ((n - 1) / n) &sdot;
-                    &sigma;<sup>2</sup></b>
+                &emsp;<b>E[&sum; (X<sub>i</sub> - X&#772;)<sup>2</sup> / n] = ((n - 1) / n) &sdot; &sigma;<sup>2</sup></b>
                 <br>
-                Moltiplicando per il fattore di Bessel <i>n / (n - 1)</i>, si ottiene lo stimatore corretto (unbiased):
+                Multiplying by Bessel's factor <i>n / (n - 1)</i> yields the unbiased estimator:
                 <br>
                 &emsp;<b>E[S<sup>2</sup>] = E[M<sub>2</sub> / (n - 1)] = &sigma;<sup>2</sup></b>.
             </p>
 
-            <h3>3. Distribuzioni Utilizzate e Momenti Esatti</h3>
+            <h3>3. Score Distributions &amp; Exact Moments</h3>
             <ul>
                 <li>
-                    <b>Uniforme Discreta U{0, 10}:</b> L'hacker ottiene un punteggio intero equiprobabile tra 0 e 10
-                    (K = 11 esiti possibili con probabilit&agrave; 1/11).
-                    La media teorica &egrave; &mu; = (0 + 10) / 2 = 5.0.
-                    La varianza teorica &egrave; &sigma;<sup>2</sup> = (K<sup>2</sup> - 1) / 12 = (121 - 1) / 12 = 120 /
-                    12 = 10.0
-                    (deviazione standard &sigma; = &radic;10 &approx; 3.1623).
+                    <b>Discrete Uniform U{0, 10}:</b> Each hacker scores an integer uniformly between 0 and 10
+                    (K = 11 outcomes with probability 1/11).
+                    Mean &mu; = (0 + 10) / 2 = 5.0; Variance &sigma;<sup>2</sup> = (K<sup>2</sup> - 1) / 12 = 120 / 12 = 10.0
+                    (&sigma; = &radic;10 &approx; 3.1623).
                 </li>
                 <li>
-                    <b>Binomiale Bin(10, 0.5):</b> L'hacker effettua 10 tentativi elementari ciascuno con
-                    probabilit&agrave;
-                    di successo p = 0.5.
-                    La media &egrave; &mu; = 10 &sdot; 0.5 = 5.0.
-                    La varianza &egrave; &sigma;<sup>2</sup> = 10 &sdot; 0.5 &sdot; 0.5 = 2.50
-                    (deviazione standard &sigma; &approx; 1.5811).
+                    <b>Binomial Bin(10, 0.5):</b> Each hacker performs 10 independent Bernoulli trials with p = 0.5.
+                    Mean &mu; = 10 &sdot; 0.5 = 5.0; Variance &sigma;<sup>2</sup> = 10 &sdot; 0.5 &sdot; 0.5 = 2.50
+                    (&sigma; &approx; 1.5811).
                 </li>
             </ul>
 
-            <h3>4. Legge dei Grandi Numeri e Teorema del Limite Centrale</h3>
+            <h3>4. Law of Large Numbers &amp; Central Limit Theorem</h3>
             <p>
-                Per il Teorema del Limite Centrale, la media campionaria X&#772;<sub>n</sub> di <i>n</i> variabili
-                aleatorie i.i.d. converge
-                in legge a una distribuzione normale:
+                By the Central Limit Theorem, the sample mean X&#772;<sub>n</sub> of <i>n</i> i.i.d. random variables
+                converges in distribution to a normal distribution:
                 <br>
                 &emsp;<b>X&#772;<sub>n</sub> &sim; &Nu;(&mu;, &sigma;<sup>2</sup> / n)</b>
                 <br>
-                All'aumentare di <i>n</i>, la varianza &sigma;<sup>2</sup>/n collassa a zero (Legge Forte dei Grandi
-                Numeri), facendo s&igrave;
-                che quasi tutte le traiettorie convergano saldamente a &mu; e l'istogramma delle medie assuma la forma a
-                campana
-                gaussiana sempre pi&ugrave; sottile.
+                As <i>n</i> grows, &sigma;<sup>2</sup>/n &rarr; 0 (Strong Law of Large Numbers), concentrating all
+                trajectories around &mu;.
             </p>
 
             <div style="text-align: right; margin-top: 20px;">
-                <button class="btn btn-primary" id="btn-close-modal" type="button">Chiudi</button>
+                <button class="btn btn-primary" id="btn-close-modal" type="button">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Script applicativi -->
     <script src="js/welford.js"></script>
     <script src="js/simulation.js"></script>
     <script src="js/app.js"></script>

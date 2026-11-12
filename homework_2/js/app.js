@@ -114,7 +114,7 @@
         }
 
         traces.push({
-            name: 'E[S_t] Teorico',
+            name: 'Theoretical E[S_t]',
             x: timeSteps,
             y: Array.from(theoreticalMeanTrajectory),
             type: 'scatter',
@@ -123,7 +123,7 @@
         });
 
         traces.push({
-            name: 'Media Campionaria',
+            name: 'Sample Mean',
             x: timeSteps,
             y: Array.from(empiricalMeanTrajectory),
             type: 'scatter',
@@ -131,7 +131,7 @@
             line: { color: '#d35400', width: 2, dash: 'dash' }
         });
 
-        const layout = createPlotlyBaseLayout('Passo temporale (t)', 'Punteggio cumulato (S_t)');
+        const layout = createPlotlyBaseLayout('Time step (t)', 'Cumulative score (S_t)');
         layout.showlegend = true;
         layout.legend = { orientation: 'h', x: 0.05, y: 1.12, font: { size: 10 } };
 
@@ -147,7 +147,7 @@
             nbinsx: 35
         };
 
-        const layout = createPlotlyBaseLayout('Punteggio finale S_n', 'Frequenza assoluta');
+        const layout = createPlotlyBaseLayout('Final score S_n', 'Absolute frequency');
         layout.shapes = [{
             type: 'line',
             x0: moments.expectedFinal,
@@ -170,7 +170,7 @@
             nbinsx: 35
         };
 
-        const layout = createPlotlyBaseLayout('Media campionaria S_n / n', 'Frequenza assoluta');
+        const layout = createPlotlyBaseLayout('Sample mean S_n / n', 'Absolute frequency');
         layout.shapes = [{
             type: 'line',
             x0: moments.meanStep,
@@ -190,7 +190,7 @@
             x: Array.from(finalStandardized),
             type: 'histogram',
             histnorm: 'probability density',
-            name: 'Dati empirici normalizzati',
+            name: 'Normalized empirical data',
             marker: { color: 'rgba(211, 84, 0, 0.65)', line: { color: '#d35400', width: 1 } },
             nbinsx: 35
         };
@@ -201,11 +201,11 @@
             y: yValues,
             type: 'scatter',
             mode: 'lines',
-            name: 'Gaussiana N(0,1)',
+            name: 'Gaussian N(0,1)',
             line: { color: '#900000', width: 2.2 }
         };
 
-        const layout = createPlotlyBaseLayout('Punteggio normalizzato Z_n', 'Densità di probabilità');
+        const layout = createPlotlyBaseLayout('Normalized score Z_n', 'Probability density');
         layout.showlegend = true;
         layout.legend = { orientation: 'h', x: 0.05, y: 1.12, font: { size: 10 } };
         layout.xaxis.range = [-4, 4];

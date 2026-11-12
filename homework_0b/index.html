@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homework 0b - Visualizzazione PDF</title>
+    <title>Homework 0b - PDF Viewer</title>
     <meta name="description"
-        content="Visualizzazione nativa nel browser del paper e relazione di ricerca per Homework 0b del corso di Statistica.">
+        content="Native browser visualization of the research paper and technical report for Homework 0b of the Statistics course.">
     <link rel="stylesheet" href="style/style.css">
 </head>
 
 <body>
     <div class="app-container" id="app">
-        <!-- Barra Superiore Navigazione & Controlli -->
+        <!-- Top Navigation & Controls Bar -->
         <header class="app-header">
             <div class="header-left">
-                <a href="../index.html" class="back-link" title="Torna alla lista delle esercitazioni">
+                <a href="../index.html" class="back-link" title="Back to exercises list">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
-                    <span class="back-text">Indice</span>
+                    <span class="back-text">Index</span>
                 </a>
 
                 <div class="divider"></div>
@@ -35,21 +35,21 @@
                 </div>
             </div>
 
-            <!-- Pulsanti di azione -->
+            <!-- Action Buttons -->
             <div class="header-actions">
                 <button type="button" class="btn btn-secondary" id="btn-toggle-info"
-                    title="Informazioni e dettagli sul documento">
+                    title="Document information and details">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span class="btn-text-responsive">Dettagli</span>
+                    <span class="btn-text-responsive">Details</span>
                 </button>
 
                 <button type="button" class="btn btn-secondary btn-icon-only" id="btn-fullscreen"
-                    title="Visualizza a schermo intero">
+                    title="View fullscreen">
                     <svg id="icon-fullscreen-enter" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path
@@ -66,45 +66,38 @@
                 </button>
 
                 <a href="homework_0b_paper.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-outline-blue"
-                    title="Apri il documento in una nuova scheda">
+                    title="Open document in a new tab">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <line x1="10" y1="14" x2="21" y2="3"></line>
                     </svg>
-                    <span class="btn-text-responsive">Nuova Scheda</span>
+                    <span class="btn-text-responsive">New Tab</span>
                 </a>
 
                 <a href="homework_0b_paper.pdf" download="homework_b_paper.pdf" class="btn btn-primary"
-                    title="Scarica il file PDF sul dispositivo">
+                    title="Download PDF file">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span class="btn-text-responsive">Scarica PDF</span>
+                    <span class="btn-text-responsive">Download PDF</span>
                 </a>
             </div>
         </header>
 
-        <!-- Area di Visualizzazione PDF -->
+        <!-- PDF Viewer Workspace -->
         <main class="workspace" id="workspace">
             <div class="pdf-container" id="pdf-container">
-                <!--
-                    Visualizzazione nativa con elemento <object>:
-                    - Utilizza il motore di rendering PDF nativo del browser (Chrome PDFium, Firefox PDF.js, Apple PDFKit)
-                    - I parametri hash configurano zoom e barre di navigazione ottimali
-                -->
                 <object id="native-pdf-object" data="homework_0b_paper.pdf#view=FitH&toolbar=1&navpanes=1"
-                    type="application/pdf" class="pdf-element" aria-label="Documento PDF Homework 0b">
+                    type="application/pdf" class="pdf-element" aria-label="Homework 0b PDF Document">
 
-                    <!-- Fallback secondario: iframe con lo stesso sorgente -->
                     <iframe src="homework_0b_paper.pdf#view=FitH" class="pdf-element"
-                        title="Visualizzatore PDF Alternativo">
+                        title="Alternative PDF Viewer">
 
-                        <!-- Fallback visivo qualora il browser non supporti embed di PDF -->
                         <div class="pdf-fallback">
                             <div class="fallback-icon">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -116,17 +109,17 @@
                                     <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                             </div>
-                            <h2>Visualizzazione PDF non supportata nativamente</h2>
+                            <h2>Native PDF Viewing Not Supported</h2>
                             <p>
-                                Il tuo browser o dispositivo mobile non supporta l'incorporamento diretto dei file PDF.
-                                Puoi visualizzarlo a pagina intera o scaricarlo direttamente.
+                                Your browser or mobile device does not support direct PDF embedding.
+                                You can open it in a full page or download it directly.
                             </p>
                             <div class="fallback-actions">
                                 <a href="homework_0b_paper.pdf" target="_blank" class="btn btn-outline-blue">
-                                    Apri PDF nel Browser
+                                    Open PDF in Browser
                                 </a>
                                 <a href="homework_0b_paper.pdf" download class="btn btn-primary">
-                                    Scarica File
+                                    Download File
                                 </a>
                             </div>
                         </div>
@@ -134,11 +127,11 @@
                 </object>
             </div>
 
-            <!-- Pannello Laterale Informativo (Drawer) -->
+            <!-- Info Drawer Sidebar -->
             <aside class="info-sidebar" id="info-sidebar" aria-hidden="true">
                 <div class="sidebar-header">
-                    <h2>Informazioni Documento</h2>
-                    <button type="button" class="btn-close" id="btn-close-info" title="Chiudi pannello">
+                    <h2>Document Information</h2>
+                    <button type="button" class="btn-close" id="btn-close-info" title="Close panel">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -148,57 +141,53 @@
                 </div>
 
                 <div class="sidebar-content">
-                    <!-- Metadati File -->
                     <div class="info-card">
-                        <h3>Metadati File</h3>
+                        <h3>File Metadata</h3>
                         <ul class="info-list">
                             <li>
-                                <span class="info-label">Nome File:</span>
+                                <span class="info-label">File Name:</span>
                                 <span class="info-value">homework_0b_paper.pdf</span>
                             </li>
                             <li>
-                                <span class="info-label">Formato:</span>
+                                <span class="info-label">Format:</span>
                                 <span class="info-value">PDF (Portable Doc)</span>
                             </li>
                             <li>
                                 <span class="info-label">Rendering:</span>
-                                <span class="info-value">Nativo Browser</span>
+                                <span class="info-value">Native Browser</span>
                             </li>
                             <li>
-                                <span class="info-label">Esercitazione:</span>
+                                <span class="info-label">Assignment:</span>
                                 <span class="info-value">Homework 0b</span>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Abstract / Relazione -->
                     <div class="info-card">
-                        <h3>Sintesi / Abstract</h3>
+                        <h3>Summary / Abstract</h3>
                         <p class="abstract-text">
-                            Questo spazio accoglie l'elaborato di ricerca o la relazione tecnica dell'Homework 0b.
-                            Il visualizzatore consente la consultazione interattiva del documento tramite le
-                            funzionalità native integrate nel browser (zoom, ricerca testuale, selezione, stampa e
-                            salvataggio).
+                            This space hosts the research paper or technical report for Homework 0b.
+                            The viewer allows interactive inspection of the document using the browser's
+                            native capabilities (zoom, text search, selection, printing, and saving).
                         </p>
                     </div>
 
-                    <!-- Scorciatoie e Suggerimenti -->
                     <div class="info-card">
-                        <h3>Comandi Utili nel Visualizzatore</h3>
+                        <h3>Useful Viewer Shortcuts</h3>
                         <div class="shortcut-item">
-                            <span>Cerca nel testo</span>
+                            <span>Find in text</span>
                             <kbd>Ctrl + F</kbd>
                         </div>
                         <div class="shortcut-item">
-                            <span>Ingrandisci / Riduci</span>
+                            <span>Zoom in / out</span>
                             <kbd>Ctrl + +/-</kbd>
                         </div>
                         <div class="shortcut-item">
-                            <span>Stampa documento</span>
+                            <span>Print document</span>
                             <kbd>Ctrl + P</kbd>
                         </div>
                         <div class="shortcut-item">
-                            <span>Chiudi Dettagli</span>
+                            <span>Close Details</span>
                             <kbd>Esc</kbd>
                         </div>
                     </div>
@@ -207,7 +196,6 @@
         </main>
     </div>
 
-    <!-- Script di gestione interattività -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnToggleInfo = document.getElementById('btn-toggle-info');
@@ -218,7 +206,6 @@
             const iconExit = document.getElementById('icon-fullscreen-exit');
             const workspace = document.getElementById('workspace');
 
-            // Gestione Sidebar Dettagli
             function toggleSidebar() {
                 const isOpen = sidebar.classList.toggle('open');
                 btnToggleInfo.classList.toggle('active', isOpen);
@@ -228,14 +215,12 @@
             btnToggleInfo.addEventListener('click', toggleSidebar);
             btnCloseInfo.addEventListener('click', toggleSidebar);
 
-            // Chiusura con tasto Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && sidebar.classList.contains('open')) {
                     toggleSidebar();
                 }
             });
 
-            // Gestione Schermo Intero
             btnFullscreen.addEventListener('click', () => {
                 if (!document.fullscreenElement) {
                     if (workspace.requestFullscreen) {
@@ -254,7 +239,7 @@
                 const isFs = !!document.fullscreenElement;
                 iconEnter.style.display = isFs ? 'none' : 'block';
                 iconExit.style.display = isFs ? 'block' : 'none';
-                btnFullscreen.title = isFs ? 'Esci da schermo intero' : 'Visualizza a schermo intero';
+                btnFullscreen.title = isFs ? 'Exit fullscreen' : 'View fullscreen';
             });
         });
     </script>

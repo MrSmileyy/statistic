@@ -51,9 +51,9 @@ const ECC = (() => {
 
     function modInverse(a, m = CURVE.p) {
         const aa = mod(a, m);
-        if (aa === 0n) throw new Error("Inverso di 0 non definito");
+        if (aa === 0n) throw new Error("Inverse of 0 is undefined");
         const { gcd, x } = extendedEuclid(aa, m);
-        if (gcd !== 1n) throw new Error("Inverso modulare inesistente");
+        if (gcd !== 1n) throw new Error("Modular inverse does not exist");
         return mod(x, m);
     }
 
@@ -158,7 +158,7 @@ const ECC = (() => {
         } else {
             d = BigInt(dInput);
             if (d < D_MIN || d > D_MAX) {
-                throw new Error(`La chiave privata deve essere compresa tra ${D_MIN} e ${D_MAX}`);
+                throw new Error(`Private key must be between ${D_MIN} and ${D_MAX}`);
             }
         }
         const Q = scalarMult(d, G);
@@ -188,7 +188,7 @@ const ECC = (() => {
             const y = modSqrt(rhs);
             if (y !== null) return { x, y, j };
         }
-        throw new Error("Codifica di Koblitz fallita per il blocco");
+        throw new Error("Koblitz encoding failed for block");
     }
 
     function decodeFromPoint(M) {
@@ -206,8 +206,8 @@ const ECC = (() => {
     }
 
     function encrypt(text, Q) {
-        if (!text) throw new Error("Il messaggio e' vuoto");
-        if (!isOnCurve(Q)) throw new Error("Chiave pubblica non valida");
+        if (!text) throw new Error("Message is empty");
+        if (!isOnCurve(Q)) throw new Error("Invalid public key");
 
         return textToBlocks(text).map(({ data, m }) => {
             const M = encodeToPoint(m);
@@ -251,14 +251,14 @@ const ECC = (() => {
 
     function decompressPoint(hex) {
         if (!/^0[23][0-9a-fA-F]{64}$/.test(hex)) {
-            throw new Error("Punto compresso non valido: " + hex.slice(0, 12) + "...");
+            throw new Error("Invalid compressed point: " + hex.slice(0, 12) + "...");
         }
         const odd = hex.slice(0, 2) === "03";
         const x = BigInt("0x" + hex.slice(2));
-        if (x >= CURVE.p) throw new Error("Ascissa fuori dal campo");
+        if (x >= CURVE.p) throw new Error("Abscissa out of field");
 
         let y = modSqrt(curveRhs(x));
-        if (y === null) throw new Error("L'ascissa non appartiene alla curva");
+        if (y === null) throw new Error("Abscissa is not on the curve");
         if (((y & 1n) === 1n) !== odd) y = CURVE.p - y;
         return { x, y };
     }
@@ -269,9 +269,9 @@ const ECC = (() => {
 
     function parseCiphertext(str) {
         const lines = str.split(/\s+/).filter(l => l.length > 0);
-        if (lines.length === 0) throw new Error("Il cifrato e' vuoto");
+        if (lines.length === 0) throw new Error("Ciphertext is empty");
         return lines.map(line => {
-            if (line.length !== 132) throw new Error("Ogni blocco deve contenere 132 caratteri esadecimali");
+            if (line.length !== 132) throw new Error("Each block must contain 132 hexadecimal characters");
             return {
                 C1: decompressPoint(line.slice(0, 66)),
                 C2: decompressPoint(line.slice(66))

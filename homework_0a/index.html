@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -14,18 +14,18 @@
     <div class="container">
         <header>
             <div class="title-area">
-                <h1>Visualizzazione Grafica ECC</h1>
+                <h1>ECC Graphical Visualization</h1>
                 <p class="subtitle" id="curve-equation-display"><i>y</i><sup>2</sup> = <i>x</i><sup>3</sup> + 0<i>x</i>
                     + 7 (mod 17)</p>
             </div>
-            <button id="btn-help" class="btn btn-secondary">? Spiegazione</button>
+            <button id="btn-help" class="btn btn-secondary">? Explanation</button>
         </header>
 
         <div class="layout">
             <aside class="sidebar">
                 <div class="card">
-                    <h3>Parametri della curva</h3>
-                    <p class="small-text">Forma di Weierstrass: <i>y</i><sup>2</sup> = <i>x</i><sup>3</sup> +
+                    <h3>Curve Parameters</h3>
+                    <p class="small-text">Weierstrass form: <i>y</i><sup>2</sup> = <i>x</i><sup>3</sup> +
                         a<i>x</i> + b (mod p)</p>
                     <div class="input-group">
                         <label>a:</label> <input type="number" id="input-a" value="0" />
@@ -34,96 +34,96 @@
                         <label>b:</label> <input type="number" id="input-b" value="7" />
                     </div>
                     <div class="input-group">
-                        <label>p (primo):</label> <input type="number" id="input-p" value="17" />
+                        <label>p (prime):</label> <input type="number" id="input-p" value="17" />
                     </div>
-                    <button id="btn-update-curve" class="btn btn-primary full-width">Aggiorna Curva</button>
+                    <button id="btn-update-curve" class="btn btn-primary full-width">Update Curve</button>
                     <div id="curve-status" class="status-msg"></div>
                 </div>
 
                 <div class="card">
-                    <h3>Operatori variabili</h3>
+                    <h3>Variable Operators</h3>
                     <div class="input-group">
                         <label>Base <i>G</i>: <button id="btn-hint-g" class="btn-icon"
-                                title="Come scelgo la base?">?</button></label>
+                                title="How do I choose the base?">?</button></label>
                         <div style="display: flex; gap: 5px;">
                             <input type="number" id="input-gx" value="1" placeholder="x" style="width: 50px;" />
                             <input type="number" id="input-gy" value="5" placeholder="y" style="width: 50px;" />
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Scalare <i>k</i>:</label>
+                        <label>Scalar <i>k</i>:</label>
                         <input type="number" id="input-k" value="6" min="1" />
                     </div>
                     <div class="input-group">
-                        <label>Velocità:</label>
+                        <label>Speed:</label>
                         <input type="range" id="input-speed" min="1" max="5" value="3" />
                     </div>
                 </div>
 
                 <div class="card controls">
                     <button id="btn-reset" class="btn">Reset</button>
-                    <button id="btn-step" class="btn btn-primary">Passo</button>
-                    <button id="btn-play" class="btn btn-success">Riproduci</button>
+                    <button id="btn-step" class="btn btn-primary">Step</button>
+                    <button id="btn-play" class="btn btn-success">Play</button>
                 </div>
             </aside>
 
             <main class="visualizations">
-                <!-- Mobile Tabs (visibili solo su schermi piccoli) -->
+                <!-- Mobile Tabs (visible only on small screens) -->
                 <div class="mobile-plot-tabs" id="mobile-plot-tabs">
-                    <button class="mobile-tab-btn active" id="tab-btn-real" type="button">Curva &reals;</button>
-                    <button class="mobile-tab-btn" id="tab-btn-fp" type="button">Campo &Fopf;<sub>p</sub></button>
+                    <button class="mobile-tab-btn active" id="tab-btn-real" type="button">Curve &reals;</button>
+                    <button class="mobile-tab-btn" id="tab-btn-fp" type="button">Field &Fopf;<sub>p</sub></button>
                 </div>
 
                 <div class="plots-container">
                     <div class="plot-box" id="plot-box-real">
-                        <h3>Rappresentazione sugli assi cartesiani nel campo &reals;</h3>
+                        <h3>Cartesian Axes Representation in the Field &reals;</h3>
                         <div id="real-plot" class="svg-container"></div>
                     </div>
                     <div class="plot-box" id="plot-box-fp">
-                        <h3>Visualizzazione del piano affine del campo &Fopf;<sub><i>p</i></sub></h3>
+                        <h3>Affine Plane Visualization of the Field &Fopf;<sub><i>p</i></sub></h3>
                         <div id="fp-plot" class="svg-container"></div>
                     </div>
                 </div>
 
                 <div class="step-details card">
-                    <h3>Step attuale</h3>
+                    <h3>Current Step</h3>
                     <div id="log-container"></div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Modal Spiegazione -->
+    <!-- Explanation Modal -->
     <div id="help-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2>Cenni Teorici: Curve di Weierstrass e Moltiplicazione Scalare</h2>
+            <h2>Theoretical Overview: Weierstrass Curves and Scalar Multiplication</h2>
             <div class="modal-body">
-                <h3>1. Moltiplicazione Scalare e Significato di <i>k</i></h3>
+                <h3>1. Scalar Multiplication and Meaning of <i>k</i></h3>
                 <p>
-                    Data una curva ellittica definita su un campo finito &Fopf;<sub><i>p</i></sub> e un generatore
-                    <i>G</i> &isin; <i>E</i>(&Fopf;<sub><i>p</i></sub>), la moltiplicazione scalare rappresenta
-                    l'addizione ripetuta di <i>G</i> con se stesso:
+                    Given an elliptic curve defined over a finite field &Fopf;<sub><i>p</i></sub> and a generator
+                    <i>G</i> &isin; <i>E</i>(&Fopf;<sub><i>p</i></sub>), scalar multiplication represents the
+                    repeated addition of <i>G</i> with itself:
                 </p>
                 <div class="math-block">
-                    <i>Q = k &sdot; G = G + G + ... + G &nbsp; (k volte)</i>
+                    <i>Q = k &sdot; G = G + G + ... + G &nbsp; (k times)</i>
                 </div>
                 <p>
-                    L'intero <i>k</i> definisce il numero di iterazioni lungo la legge di gruppo (<i>iG = (i-1)G + G</i>
-                    per <i>i = 2, ..., k</i>). In crittografia asimmetrica (ECC), <i>k</i> agisce da <strong>chiave
-                        privata</strong>, mentre il punto risultante <i>Q</i> costituisce la <strong>chiave
-                        pubblica</strong>.
+                    The integer <i>k</i> defines the number of iterations along the group law (<i>iG = (i-1)G + G</i>
+                    for <i>i = 2, ..., k</i>). In asymmetric cryptography (ECC), <i>k</i> acts as the <strong>private
+                        key</strong>, while the resulting point <i>Q</i> constitutes the <strong>public
+                        key</strong>.
                 </p>
 
-                <h3>2. Legge di Gruppo e Calcolo della Pendenza <i>s</i></h3>
+                <h3>2. Group Law and Slope Calculation <i>s</i></h3>
                 <p>
-                    Dati due punti <i>P = (x<sub>P</sub>, y<sub>P</sub>)</i> e <i>Q = (x<sub>Q</sub>, y<sub>Q</sub>)</i>
-                    sulla curva, la retta che li congiunge ha pendenza <i>s</i> calcolata in modo analitico:
+                    Given two points <i>P = (x<sub>P</sub>, y<sub>P</sub>)</i> and <i>Q = (x<sub>Q</sub>, y<sub>Q</sub>)</i>
+                    on the curve, the line connecting them has slope <i>s</i> computed analytically:
                 </p>
                 <ul class="math-list">
                     <li>
-                        <strong>Raddoppio di punto (<i>P = Q</i>):</strong><br />
-                        Si calcola la retta tangente a <i>P</i>. Differenziando l'equazione di Weierstrass
+                        <strong>Point doubling (<i>P = Q</i>):</strong><br />
+                        The tangent line at <i>P</i> is computed. Differentiating the Weierstrass equation
                         <i>y<sup>2</sup> = x<sup>3</sup> + ax + b</i>:
                         <div class="math-block">
                             <i>s &equiv; (3x<sub>P</sub><sup>2</sup> + a) &sdot; (2y<sub>P</sub>)<sup>-1</sup>
@@ -131,8 +131,8 @@
                         </div>
                     </li>
                     <li>
-                        <strong>Addizione di punti distinti (<i>P &ne; Q</i>):</strong><br />
-                        Si calcola la retta secante passante per entrambi i punti:
+                        <strong>Addition of distinct points (<i>P &ne; Q</i>):</strong><br />
+                        The secant line passing through both points is computed:
                         <div class="math-block">
                             <i>s &equiv; (y<sub>Q</sub> - y<sub>P</sub>) &sdot; (x<sub>Q</sub> -
                                 x<sub>P</sub>)<sup>-1</sup> mod p</i>
@@ -140,63 +140,63 @@
                     </li>
                 </ul>
                 <p>
-                    In aritmetica modulare, l'inverso del denominatore viene calcolato tramite l'Algoritmo di Euclide
-                    Esteso.
+                    In modular arithmetic, the inverse of the denominator is computed using the Extended Euclidean
+                    Algorithm.
                 </p>
 
-                <h3>3. Determinazione del Terzo Punto e Riflessione</h3>
+                <h3>3. Finding the Third Point and Reflection</h3>
                 <p>
-                    Una retta interseca la curva cubica in tre punti. Sostituendo la retta <i>y = s(x - x<sub>P</sub>) +
-                        y<sub>P</sub></i> nell'equazione della curva, dalle relazioni di Viète per le radici del
-                    polinomio cubico discende:
+                    A line intersects the cubic curve at three points. Substituting the line <i>y = s(x - x<sub>P</sub>) +
+                        y<sub>P</sub></i> into the curve equation, Vieta's formulas for the roots of the cubic
+                    polynomial yield:
                 </p>
                 <div class="math-block">
                     <i>x<sub>3</sub> &equiv; s<sup>2</sup> - x<sub>P</sub> - x<sub>Q</sub> mod p</i>
                 </div>
                 <p>
-                    La coordinata <i>y</i> del terzo punto d'intersezione sulla retta è:
+                    The <i>y</i> coordinate of the third intersection point on the line is:
                 </p>
                 <div class="math-block">
                     <i>y<sub>int</sub> &equiv; s(x<sub>P</sub> - x<sub>3</sub>) - y<sub>P</sub> mod p</i>
                 </div>
                 <p>
-                    Per la definizione assiomatica di gruppo abeliano, tre punti allineati sommano all'elemento neutro:
-                    <i>P + Q + (-R) = &Omicron;</i>. Pertanto, il risultato <i>R = P + Q</i> è l'opposto del terzo punto
-                    d'intersezione (riflessione rispetto all'asse delle ascisse):
+                    By the axiomatic definition of an abelian group, three collinear points sum to the identity element:
+                    <i>P + Q + (-R) = &Omicron;</i>. Therefore, the result <i>R = P + Q</i> is the opposite of the third
+                    intersection point (reflection across the x-axis):
                 </p>
                 <div class="math-block">
                     <i>y<sub>3</sub> &equiv; -y<sub>int</sub> mod p ==> R = (x<sub>3</sub>, y<sub>3</sub>)</i>
                 </div>
 
-                <h3>4. Punto all'Infinito (&Omicron;)</h3>
+                <h3>4. Point at Infinity (&Omicron;)</h3>
                 <p>
-                    Quando <i>x<sub>P</sub> = x<sub>Q</sub></i> e <i>y<sub>P</sub> &equiv; -y<sub>Q</sub> mod p</i>,
-                    la retta è verticale (<i>s = &infin;</i>). Essa non incontra un terzo punto affine nel piano, ma
-                    interseca la curva nel punto ideale all'infinito <i>&Omicron;</i>, elemento neutro del gruppo: <i>P
+                    When <i>x<sub>P</sub> = x<sub>Q</sub></i> and <i>y<sub>P</sub> &equiv; -y<sub>Q</sub> mod p</i>,
+                    the line is vertical (<i>s = &infin;</i>). It does not meet a third affine point in the plane, but
+                    intersects the curve at the ideal point at infinity <i>&Omicron;</i>, the identity element of the group: <i>P
                         + (-P) = &Omicron;</i>.
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Modal Hint Base G -->
+    <!-- Base G Hint Modal -->
     <div id="hint-g-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close-hint-modal" style="float: right; cursor: pointer; font-size: 1.5rem;">&times;</span>
-            <h2>Come scegliere la Base G?</h2>
+            <h2>How to choose the Base G?</h2>
             <div class="modal-body">
-                <p>Il punto base <i>G = (x, y)</i> non può essere scelto a caso. Deve essere un punto che
-                    <strong>appartiene alla curva</strong>.
+                <p>The base point <i>G = (x, y)</i> cannot be chosen arbitrarily. It must be a point that
+                    <strong>lies on the curve</strong>.
                 </p>
-                <p>Per verificare se un punto appartiene alla curva, sostituisci <i>x</i> e <i>y</i> nell'equazione:</p>
+                <p>To check if a point lies on the curve, substitute <i>x</i> and <i>y</i> into the equation:</p>
                 <p style="text-align: center;"><i>y<sup>2</sup> &equiv; x<sup>3</sup> + ax + b (mod p)</i></p>
-                <p><strong>Esempio:</strong> per <i>y<sup>2</sup> = x<sup>3</sup> + 7 (mod 17)</i>, il punto <i>(1,
-                        5)</i> è valido perché:</p>
+                <p><strong>Example:</strong> for <i>y<sup>2</sup> = x<sup>3</sup> + 7 (mod 17)</i>, the point <i>(1,
+                        5)</i> is valid because:</p>
                 <ul>
                     <li><i>y<sup>2</sup></i> = 5<sup>2</sup> = 25 &equiv; <strong>8</strong> (mod 17)</li>
                     <li><i>x<sup>3</sup> + 7</i> = 1<sup>3</sup> + 7 = 1 + 7 = <strong>8</strong> (mod 17)</li>
                 </ul>
-                <p>Se inserisci un punto non valido, l'applicazione mostrerà un errore.</p>
+                <p>If you enter an invalid point, the application will display an error.</p>
             </div>
         </div>
     </div>

@@ -116,7 +116,7 @@
             elements.streamHistoryBody.innerHTML = `
                 <tr>
                     <td colspan="6" style="text-align: center; color: #888;">
-                        Nessuna osservazione accumulata. Inserisci un valore o genera dati casuali.
+                        No observations accumulated. Enter a value or generate random samples.
                     </td>
                 </tr>`;
             return;
@@ -202,14 +202,14 @@
             elements.stabilityOutput.style.display = 'block';
             elements.stabilityOutput.innerHTML = `
                 <div style="font-weight: 700; color: #900000; margin-bottom: 6px;">
-                    Test di Cancellazione Catastrofica: dataset [10<sup>9</sup>+4, 10<sup>9</sup>+7, 10<sup>9</sup>+13, 10<sup>9</sup>+16]
+                    Catastrophic Cancellation Test: dataset [10<sup>9</sup>+4, 10<sup>9</sup>+7, 10<sup>9</sup>+13, 10<sup>9</sup>+16]
                 </div>
-                <div><b>Varianza Campionaria Esatta Teorica:</b> <code>30.000000</code></div>
-                <div><b>Formula di Welford (One-pass Knuth):</b> <code style="color: #27ae60; font-weight: bold;">${result.welford.variance.toFixed(6)}</code> (Errore: 0.00)</div>
-                <div><b>Formula Two-Pass (Ground truth):</b> <code>${result.twoPass.variance.toFixed(6)}</code></div>
-                <div><b>Formula Naïve standard &sum;x² - (&sum;x)²/n:</b> <code style="color: #900000; font-weight: bold;">${result.naive.variance.toFixed(6)}</code> (Errore: ${result.errorNaive.toExponential(2)})</div>
+                <div><b>Exact Theoretical Sample Variance:</b> <code>30.000000</code></div>
+                <div><b>Welford's Formula (One-pass Knuth):</b> <code style="color: #27ae60; font-weight: bold;">${result.welford.variance.toFixed(6)}</code> (Error: 0.00)</div>
+                <div><b>Two-Pass Formula (Ground truth):</b> <code>${result.twoPass.variance.toFixed(6)}</code></div>
+                <div><b>Naïve Textbook Formula &sum;x² - (&sum;x)²/n:</b> <code style="color: #900000; font-weight: bold;">${result.naive.variance.toFixed(6)}</code> (Error: ${result.errorNaive.toExponential(2)})</div>
                 <div style="font-size: 0.82rem; color: #555; margin-top: 6px;">
-                    <i>Spiegazione:</i> La formula textbook sottrae <code>${(testValues[0] * testValues[0]).toExponential(4)}</code> da un valore quasi identico, eccedendo i 53 bit di mantissa del floating point standard. L'algoritmo di Knuth mantiene la piena precisione operando direttamente sugli scarti &delta;.
+                    <i>Explanation:</i> The textbook formula subtracts <code>${(testValues[0] * testValues[0]).toExponential(4)}</code> from a nearly identical value, exceeding the 53-bit mantissa of IEEE 754 double precision. Knuth's algorithm preserves full precision by operating directly on deviations &delta;.
                 </div>
             `;
         });
@@ -510,9 +510,9 @@
             });
         }
 
-        // Linea Media Teorica (Rossa Sapienza)
+        // Theoretical Mean Line (Sapienza Red)
         traces.push({
-            name: `Media Teorica µ = ${distribution.mu}`,
+            name: `Theoretical Mean µ = ${distribution.mu}`,
             x: [1, timeSteps[timeSteps.length - 1]],
             y: [distribution.mu, distribution.mu],
             type: 'scatter',
@@ -520,9 +520,9 @@
             line: { color: '#900000', width: 2.5 }
         });
 
-        // Linea Media Empirica Globale (Arancione tratteggiata)
+        // Global Empirical Mean Line (Dashed Orange)
         traces.push({
-            name: 'Media Globale Hacker',
+            name: 'Global Hacker Mean',
             x: timeSteps.slice(1),
             y: Array.from(globalMeanTrajectory.subarray(1)),
             type: 'scatter',
@@ -530,13 +530,13 @@
             line: { color: '#d35400', width: 2, dash: 'dash' }
         });
 
-        const layout = createPlotlyBaseLayout('Sistemi Attaccati (t)', 'Media Cumulata X̄(t)', true);
+        const layout = createPlotlyBaseLayout('Attacked Systems (t)', 'Cumulative Mean X̄(t)', true);
         layout.legend = { orientation: 'h', x: 0.05, y: 1.14, font: { size: 10 } };
 
         window.Plotly.react('chart-mean-paths', traces, layout, plotlyConfig);
     };
 
-    /* Rendering Grafico 2: Traiettorie Varianze Cumulative (Welford) */
+    /* Render Chart 2: Cumulative Variance Trajectories (Welford) */
     const renderVariancePathsChart = (data) => {
         if (!window.Plotly) {
             renderCanvasFallback('chart-var-paths', 'var-paths', data);
@@ -547,7 +547,7 @@
         const traces = [];
 
         for (let i = 0; i < varianceTrajectories.length; i += 1) {
-            // La varianza campionaria è definita per t >= 2
+            // Sample variance is defined for t >= 2
             traces.push({
                 x: timeSteps.slice(2),
                 y: Array.from(varianceTrajectories[i].subarray(2)),
@@ -559,9 +559,9 @@
             });
         }
 
-        // Varianza Teorica (Rossa)
+        // Theoretical Variance (Red)
         traces.push({
-            name: `Varianza Teorica σ² = ${distribution.sigma2}`,
+            name: `Theoretical Variance σ² = ${distribution.sigma2}`,
             x: [2, timeSteps[timeSteps.length - 1]],
             y: [distribution.sigma2, distribution.sigma2],
             type: 'scatter',
@@ -569,9 +569,9 @@
             line: { color: '#900000', width: 2.5 }
         });
 
-        // Media Empirica Globale delle Varianze
+        // Global Empirical Mean of Variances
         traces.push({
-            name: 'Media Varianze Welford',
+            name: 'Mean Welford Variance',
             x: timeSteps.slice(2),
             y: Array.from(globalVarianceTrajectory.subarray(2)),
             type: 'scatter',
@@ -579,13 +579,13 @@
             line: { color: '#27ae60', width: 2, dash: 'dash' }
         });
 
-        const layout = createPlotlyBaseLayout('Sistemi Attaccati (t)', 'Varianza Campionaria S²(t)', true);
+        const layout = createPlotlyBaseLayout('Attacked Systems (t)', 'Sample Variance S²(t)', true);
         layout.legend = { orientation: 'h', x: 0.05, y: 1.14, font: { size: 10 } };
 
         window.Plotly.react('chart-var-paths', traces, layout, plotlyConfig);
     };
 
-    /* Rendering Grafico 3: Istogramma Medie Campionarie Finali + Curva Normale TLC */
+    /* Render Chart 3: Final Sample Means Histogram + CLT Normal Curve */
     const renderMeansDistributionChart = (data) => {
         if (!window.Plotly) {
             renderCanvasFallback('chart-means-dist', 'means-dist', data);
@@ -597,7 +597,7 @@
         const se = Math.sqrt(distribution.sigma2 / params.n);
 
         const histTrace = {
-            name: 'Frequenza Medie Hacker',
+            name: 'Hacker Means Frequency',
             x: Array.from(hackerFinalMeans),
             type: 'histogram',
             histnorm: 'probability density',
@@ -605,13 +605,13 @@
             nbinsx: 35
         };
 
-        // Sovrapposizione Curva Normale Teorica N(mu, sigma^2/n)
+        // Overlay Theoretical Normal Curve N(mu, sigma^2/n)
         const minX = Math.min(mu - 4 * se, ...hackerFinalMeans);
         const maxX = Math.max(mu + 4 * se, ...hackerFinalMeans);
         const normalCurve = PenetrationSimulation.generateNormalPdf(mu, se, minX, maxX, 150);
 
         const curveTrace = {
-            name: 'Densità Normale TLC N(µ, σ²/n)',
+            name: 'CLT Normal Density N(µ, σ²/n)',
             x: normalCurve.x,
             y: normalCurve.y,
             type: 'scatter',
@@ -619,13 +619,13 @@
             line: { color: '#900000', width: 2.5 }
         };
 
-        const layout = createPlotlyBaseLayout('Media Campionaria Finale X̄', 'Densità di Probabilità', true);
+        const layout = createPlotlyBaseLayout('Final Sample Mean X̄', 'Probability Density', true);
         layout.legend = { orientation: 'h', x: 0.05, y: 1.14, font: { size: 10 } };
 
         window.Plotly.react('chart-means-dist', [histTrace, curveTrace], layout, plotlyConfig);
     };
 
-    /* Rendering Grafico 4: Istogramma Varianze Campionarie Finali (Unbiasedness) */
+    /* Render Chart 4: Final Sample Variances Histogram (Unbiasedness) */
     const renderVariancesDistributionChart = (data) => {
         if (!window.Plotly) {
             renderCanvasFallback('chart-vars-dist', 'vars-dist', data);
@@ -635,7 +635,7 @@
         const { hackerFinalVariances, distribution } = data;
 
         const histTrace = {
-            name: 'Frequenza Varianze S²',
+            name: 'Sample Variances S² Frequency',
             x: Array.from(hackerFinalVariances),
             type: 'histogram',
             histnorm: 'probability density',
@@ -643,7 +643,7 @@
             nbinsx: 35
         };
 
-        const layout = createPlotlyBaseLayout('Varianza Campionaria S²', 'Densità di Probabilità', false);
+        const layout = createPlotlyBaseLayout('Sample Variance S²', 'Probability Density', false);
         // Linea verticale teorica sigma^2
         layout.shapes = [{
             type: 'line',
@@ -674,15 +674,15 @@
     const updateConclusionsAndMetrics = (simResult) => {
         const { params, distribution, summary, executionTimeMs } = simResult;
 
-        // Metric Cards Superiori
+        // Metric Cards
         elements.metricMeanMeans.textContent = summary.meanOfMeans.toFixed(3);
-        elements.metricSubMu.textContent = `Atteso µ = ${distribution.mu.toFixed(3)} (Δ: ${Math.abs(summary.meanDifference).toFixed(4)})`;
+        elements.metricSubMu.textContent = `Expected µ = ${distribution.mu.toFixed(3)} (Δ: ${Math.abs(summary.meanDifference).toFixed(4)})`;
 
         elements.metricMeanVars.textContent = summary.meanOfVariances.toFixed(3);
-        elements.metricSubSigma2.textContent = `Atteso σ² = ${distribution.sigma2.toFixed(3)} (Δ: ${Math.abs(summary.varianceDifference).toFixed(4)})`;
+        elements.metricSubSigma2.textContent = `Expected σ² = ${distribution.sigma2.toFixed(3)} (Δ: ${Math.abs(summary.varianceDifference).toFixed(4)})`;
 
         elements.metricVarMeans.textContent = summary.varianceOfMeans.toFixed(4);
-        elements.metricSubMeanVar.textContent = `Teorico σ²/n = ${summary.theoreticalMeanVariance.toFixed(4)}`;
+        elements.metricSubMeanVar.textContent = `Theoretical σ²/n = ${summary.theoreticalMeanVariance.toFixed(4)}`;
 
         elements.metricTime.textContent = `${executionTimeMs.toFixed(1)} ms`;
 
@@ -702,10 +702,10 @@
         elements.dynEmpVarmeans.textContent = summary.varianceOfMeans.toFixed(4);
     };
 
-    /* Esecuzione Principale della Simulazione */
+    /* Main Simulation Runner */
     const runSimulation = () => {
         elements.btnRun.disabled = true;
-        elements.btnRun.textContent = 'Calcolo in corso...';
+        elements.btnRun.textContent = 'Computing...';
 
         setTimeout(() => {
             try {
@@ -718,10 +718,10 @@
                 renderMeansDistributionChart(result);
                 renderVariancesDistributionChart(result);
             } catch (err) {
-                console.error("Errore durante l'esecuzione della simulazione:", err);
+                console.error("Error running simulation:", err);
             } finally {
                 elements.btnRun.disabled = false;
-                elements.btnRun.textContent = 'Esegui Simulazione';
+                elements.btnRun.textContent = 'Run Simulation';
             }
         }, 30);
     };

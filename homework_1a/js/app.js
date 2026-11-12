@@ -1,20 +1,20 @@
 /*
  * app.js
- * Collega il modulo ECC (ecc.js) e la vista a passi (steps.js) all'interfaccia:
- * generazione delle chiavi, cifratura e decifratura del messaggio.
+ * Connects the ECC module (ecc.js) and the step-by-step view (steps.js) to the UI:
+ * key generation, message encryption, and decryption.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // --- Stato ---
+    // --- State ---
     const state = {
         keys: null,         // { d, Q, trace }
-        blocks: null,       // ultimo risultato di ECC.encrypt
-        encryptedText: null // testo originale dell'ultima cifratura
+        blocks: null,       // latest result from ECC.encrypt
+        encryptedText: null // original text from the latest encryption
     };
 
     const $ = id => document.getElementById(id);
 
-    // --- Parametri della curva ---
+    // --- Curve Parameters ---
     function renderCurveParams() {
         const C = ECC.CURVE;
         const rows = [
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         $("input-d").max = ECC.D_MAX.toString();
     }
 
-    // --- Chiavi ---
+    // --- Keys ---
     function setKeys(dInput) {
         const statusEl = $("key-status");
         try {
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
             $("input-d").value = state.keys.d.toString();
             renderKeys(ms);
         } catch (err) {
-            statusEl.textContent = "Errore: " + err.message;
+            statusEl.textContent = "Error: " + err.message;
         }
     }
 
@@ -61,15 +61,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const ok = ECC.isOnCurve(Q);
         $("out-check").innerHTML = ok
-            ? `<span class="badge-result">Q appartiene alla curva</span> <span class="info-text">calcolata in ${ms} ms</span>`
-            : `<span class="badge-error">Q non appartiene alla curva</span>`;
+            ? `<span class="badge-result">Q is on the curve</span> <span class="info-text">computed in ${ms} ms</span>`
+            : `<span class="badge-error">Q is not on the curve</span>`;
 
-        // Stepper del processo di generazione chiavi: scelta di d e calcolo di Q = d * G
+        // Key generation process stepper: choosing d and computing Q = d * G
         const keyRoot = $("key-process");
         if (keyRoot) {
             new Stepper(keyRoot, {
                 blockCount: 1,
-                label: "Come viene scelta la chiave pubblica Q = d &sdot; G",
+                label: "How the public key Q = d &sdot; G is chosen",
                 buildSteps: KeyGenSteps.build({
                     d,
                     Q,
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Cifratura ---
+    // --- Encryption ---
     function encryptMessage() {
         const text = $("input-message").value;
         const info = $("enc-info");
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cipher = ECC.serializeCiphertext(state.blocks);
             $("output-cipher").value = cipher;
             const n = state.blocks.length;
-            info.textContent = `${n} ${n === 1 ? "blocco" : "blocchi"} in ${ms} ms`;
+            info.textContent = `${n} ${n === 1 ? "block" : "blocks"} in ${ms} ms`;
 
             const root = $("enc-process");
             root.classList.remove("hidden");
@@ -107,19 +107,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
             }).render();
 
-            // La decifratura precedente non e' piu' valida
+            // Previous decryption is no longer valid
             $("output-plain").value = "";
             $("dec-status").innerHTML = "";
             $("dec-info").textContent = "";
             $("dec-process").classList.add("hidden");
         } catch (err) {
-            info.textContent = "Errore: " + err.message;
+            info.textContent = "Error: " + err.message;
         }
     }
 
-    // --- Decifratura ---
-    // Il cifrato viene riletto dalla textarea, cosi' la decifratura usa solo
-    // (C1, C2) e la chiave privata. I dati del mittente servono solo per i confronti.
+    // --- Decryption ---
+    // The ciphertext is read back from the textarea so decryption uses only
+    // (C1, C2) and the private key. Sender data is used solely for comparisons.
     function decryptMessage() {
         const info = $("dec-info");
         const statusEl = $("dec-status");
@@ -134,14 +134,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const ms = (performance.now() - t0).toFixed(1);
 
             $("output-plain").value = result.text;
-            info.textContent = `${blocks.length} ${blocks.length === 1 ? "blocco" : "blocchi"} in ${ms} ms`;
+            info.textContent = `${blocks.length} ${blocks.length === 1 ? "block" : "blocks"} in ${ms} ms`;
 
             if (!result.valid) {
-                statusEl.innerHTML = `<span class="badge-error">Decifratura non valida: la chiave privata non corrisponde a quella usata per cifrare</span>`;
+                statusEl.innerHTML = `<span class="badge-error">Invalid decryption: the private key does not match the one used to encrypt</span>`;
             } else if (result.text === state.encryptedText) {
-                statusEl.innerHTML = `<span class="badge-result">Il testo decifrato coincide con l'originale</span>`;
+                statusEl.innerHTML = `<span class="badge-result">Decrypted text matches the original</span>`;
             } else {
-                statusEl.innerHTML = `<span class="badge-result">Decifratura completata</span>`;
+                statusEl.innerHTML = `<span class="badge-result">Decryption completed</span>`;
             }
 
             root.classList.remove("hidden");
@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             info.textContent = "";
             root.classList.add("hidden");
-            statusEl.innerHTML = `<span class="badge-error">Errore: ${Fmt.escapeHtml(err.message)}</span>`;
+            statusEl.innerHTML = `<span class="badge-error">Error: ${Fmt.escapeHtml(err.message)}</span>`;
         }
     }
 
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("btn-use-key").addEventListener("click", () => {
         const raw = $("input-d").value.trim();
         if (!/^\d+$/.test(raw)) {
-            $("key-status").textContent = "Errore: inserisci un intero positivo";
+            $("key-status").textContent = "Error: please enter a positive integer";
             return;
         }
         setKeys(raw);

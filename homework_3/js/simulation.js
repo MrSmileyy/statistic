@@ -19,31 +19,31 @@ class PenetrationSimulation {
             const sigma2 = nTrials * p * (1 - p); // 2.5
             return {
                 type: 'binomial',
-                name: 'Binomiale Bin(10, 0.5)',
+                name: 'Binomial Bin(10, 0.5)',
                 minScore: 0,
                 maxScore: 10,
                 mu,
                 sigma2,
                 sigma: Math.sqrt(sigma2),
-                description: 'Distribuzione Binomiale su 10 prove con p = 0.50 (µ = 5.0, σ² = 2.50)'
+                description: 'Binomial distribution over 10 trials with p = 0.50 (µ = 5.0, σ² = 2.50)'
             };
         }
 
-        // Default: Distribuzione Uniforme Discreta su {0, 1, 2, ..., 10}
-        // Cardinalità K = 11 valori equidistribuiti
+        // Default: Discrete Uniform Distribution on {0, 1, 2, ..., 10}
+        // Cardinality K = 11 equally likely outcomes
         // µ = (a + b) / 2 = 5.0
         // σ² = (K^2 - 1) / 12 = (121 - 1) / 12 = 120 / 12 = 10.0
         const mu = 5.0;
         const sigma2 = 10.0;
         return {
             type: 'uniform',
-            name: 'Uniforme Discreta U{0, 10}',
+            name: 'Discrete Uniform U{0, 10}',
             minScore: 0,
             maxScore: 10,
             mu,
             sigma2,
             sigma: Math.sqrt(sigma2),
-            description: 'Distribuzione Uniforme Discreta su {0, 1, ..., 10} (µ = 5.0, σ² = 10.0)'
+            description: 'Discrete Uniform distribution on {0, 1, ..., 10} (µ = 5.0, σ² = 10.0)'
         };
     }
 

@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function addPoints(P, Q, a, p) {
         if (!P) return Q;
         if (!Q) return P;
-        if (P.x === Q.x && P.y === mod(-Q.y, p)) return null; // Punto all'infinito
+        if (P.x === Q.x && P.y === mod(-Q.y, p)) return null; // Point at infinity
 
         let s, sNum, sDen;
         if (P.x === Q.x && P.y === Q.y) {
@@ -338,9 +338,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     G_real: G_real,
                     log: `
                         <div class="phase">
-                            <div class="phase-title">Punto Base Iniziale: 1G</div>
-                            <div class="math-row">Partenza al punto generatore <i>G</i> = (${R.x}, ${R.y}) mod ${state.p}</div>
-                            <div class="math-result"><strong>Stato Corrente:</strong> <span class="badge-result">1G = (${R.x}, ${R.y})</span></div>
+                            <div class="phase-title">Initial Base Point: 1G</div>
+                            <div class="math-row">Starting at generator point <i>G</i> = (${R.x}, ${R.y}) mod ${state.p}</div>
+                            <div class="math-result"><strong>Current State:</strong> <span class="badge-result">1G = (${R.x}, ${R.y})</span></div>
                         </div>
                     `
                 });
@@ -358,9 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     G_real: G_real,
                     log: `
                         <div class="phase">
-                            <div class="phase-title">Passo ${i} di ${state.k}: Punto all'Infinito</div>
-                            <div class="math-row">I punti <i>${i-1}G</i> e <i>G</i> sono simmetrici rispetto all'asse orizzontale.</div>
-                            <div class="math-result"><strong>Risultato:</strong> <span class="badge-result">${i}G = O (Punto all'Infinito)</span></div>
+                            <div class="phase-title">Step ${i} of ${state.k}: Point at Infinity</div>
+                            <div class="math-row">Points <i>${i-1}G</i> and <i>G</i> are symmetric with respect to the horizontal axis.</div>
+                            <div class="math-result"><strong>Result:</strong> <span class="badge-result">${i}G = O (Point at Infinity)</span></div>
                         </div>
                     `
                 });
@@ -381,29 +381,29 @@ document.addEventListener("DOMContentLoaded", () => {
             let ry3 = s_real * (R_real.x - rx3) - R_real.y;
             let nextR_real = { x: rx3, y: ry3 };
 
-            let opName = (i === 2) ? "Raddoppio: 2G = G + G" : `Addizione: ${i}G = ${i-1}G + G`;
+            let opName = (i === 2) ? "Doubling: 2G = G + G" : `Addition: ${i}G = ${i-1}G + G`;
             let slopeFormula = (i === 2) ?
                 `s &equiv; (3x<sub>P</sub><sup>2</sup> + a) / (2y<sub>P</sub>)` :
                 `s &equiv; (y<sub>Q</sub> - y<sub>P</sub>) / (x<sub>Q</sub> - x<sub>P</sub>)`;
 
             let logHtml = `
                 <div class="phase">
-                    <div class="phase-title">Passo ${i} di ${state.k}: ${opName}</div>
+                    <div class="phase-title">Step ${i} of ${state.k}: ${opName}</div>
                     <div class="math-row">
-                        <span><b>Punti:</b> P = (${R.x}, ${R.y}), Q = (${state.G.x}, ${state.G.y})</span>
+                        <span><b>Points:</b> P = (${R.x}, ${R.y}), Q = (${state.G.x}, ${state.G.y})</span>
                     </div>
                     <div class="math-row">
-                        <span><b>Pendenza:</b> ${slopeFormula} &equiv; ${op.sNum} / ${op.sDen} &equiv; ${op.sNum} &times; ${op.sDen}<sup>-1</sup> &equiv; <b>${op.s}</b> (mod ${state.p})</span>
+                        <span><b>Slope:</b> ${slopeFormula} &equiv; ${op.sNum} / ${op.sDen} &equiv; ${op.sNum} &times; ${op.sDen}<sup>-1</sup> &equiv; <b>${op.s}</b> (mod ${state.p})</span>
                     </div>
                     <div class="math-row">
-                        <span><b>Intersezione:</b> x<sub>3</sub> &equiv; s<sup>2</sup> - x<sub>P</sub> - x<sub>Q</sub> &equiv; <b>${op.res.x}</b> (mod ${state.p})</span> |
+                        <span><b>Intersection:</b> x<sub>3</sub> &equiv; s<sup>2</sup> - x<sub>P</sub> - x<sub>Q</sub> &equiv; <b>${op.res.x}</b> (mod ${state.p})</span> |
                         <span>-y<sub>3</sub> &equiv; <b>${op.intersect.y}</b> (mod ${state.p})</span>
                     </div>
                     <div class="math-row">
-                        <span><b>Riflessione:</b> y<sub>3</sub> &equiv; -(-y<sub>3</sub>) &equiv; <b>${op.res.y}</b> (mod ${state.p})</span>
+                        <span><b>Reflection:</b> y<sub>3</sub> &equiv; -(-y<sub>3</sub>) &equiv; <b>${op.res.y}</b> (mod ${state.p})</span>
                     </div>
                     <div class="math-result">
-                        <strong>Risultato:</strong> <span class="badge-result">${i}G = (${op.res.x}, ${op.res.y})</span>
+                        <strong>Result:</strong> <span class="badge-result">${i}G = (${op.res.x}, ${op.res.y})</span>
                     </div>
                 </div>
             `;
@@ -615,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     realDyn.append("text").attr("class", "axis-label")
                         .attr("x", 10).attr("y", 18)
                         .style("fill", "#e67e22").style("font-weight", "bold")
-                        .text(`-R a (${frame.nextR_real.x.toFixed(1)}, ${rIntY.toFixed(1)}) oltre il bordo`);
+                        .text(`-R at (${frame.nextR_real.x.toFixed(1)}, ${rIntY.toFixed(1)}) out of bounds`);
                 }
             }
 
@@ -673,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderFrame(0, false);
             }
             state.isPlaying = true;
-            document.getElementById("btn-play").innerText = "Pausa";
+            document.getElementById("btn-play").innerText = "Pause";
             state.timer = setTimeout(playNext, 60);
         }
     }
@@ -681,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function stopPlay() {
         state.isPlaying = false;
         clearTimeout(state.timer);
-        document.getElementById("btn-play").innerText = "Riproduci";
+        document.getElementById("btn-play").innerText = "Play";
     }
 
     function resetAnim() {
@@ -699,7 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const statusEl = document.getElementById("curve-status");
         if (isSingular(state.a, state.b, state.p)) {
-            statusEl.innerText = "Errore: La curva è singolare (discriminante = 0). Cambia a o b.";
+            statusEl.innerText = "Error: The curve is singular (discriminant = 0). Change a or b.";
             return;
         }
         statusEl.innerText = "";
@@ -710,7 +710,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.points = calculatePoints(state.a, state.b, state.p);
 
         if (state.points.length === 0) {
-            statusEl.innerText = "Nessun punto trovato sulla curva.";
+            statusEl.innerText = "No points found on the curve.";
             return;
         }
 
@@ -727,7 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isNaN(gx) || isNaN(gy)) return;
 
         if (!isOnCurve(gx, gy, state.a, state.b, state.p)) {
-            statusEl.innerText = `Errore: il punto (${gx}, ${gy}) non appartiene alla curva.`;
+            statusEl.innerText = `Error: the point (${gx}, ${gy}) does not lie on the curve.`;
             return;
         }
         statusEl.innerText = "";
