@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 4: Riemann vs Lebesgue Integration &amp; Normal CDF</title>
+    <meta name="description"
+        content="Numerical comparison of Riemann and Lebesgue integration, pathological functions, Liouville's theorem, and numerical methods for the standard normal CDF.">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <a href="../index.html" class="back-link" title="Back to main index">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Index</span>
+                </a>
+                <h1>Homework 4: Riemann vs. Lebesgue Integration &amp; Normal CDF</h1>
+                <p class="subtitle">Domain vs. range partitioning, pathological functions, Liouville's theorem, and numerical approximations of &Phi;(x)</p>
+            </div>
+            <div>
+                <button id="btn-help" class="btn btn-secondary" type="button">? Theoretical Guide</button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="nav-tabs" aria-label="Homework sections">
+            <button class="tab-btn active" data-tab="pane-ex1" type="button">
+                Exercise 1: Riemann &amp; Lebesgue Integration
+            </button>
+            <button class="tab-btn" data-tab="pane-ex2" type="button">
+                Exercise 2: Numerical Normal CDF &Phi;(x)
+            </button>
+        </nav>
+
+        <!-- ========================================================= -->
+        <!-- EXERCISE 1: RIEMANN AND LEBESGUE INTEGRATION              -->
+        <!-- ========================================================= -->
+        <section id="pane-ex1" class="tab-pane active">
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="card">
+                        <h3>Integration Parameters</h3>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="select-fn">Target Function f(x):</label>
+                            </div>
+                            <select id="select-fn" class="select-input">
+                                <option value="sin" selected>f(x) = sin(x), x &isin; [0, &pi;]</option>
+                                <option value="x2">f(x) = x&sup2;, x &isin; [0, 1]</option>
+                                <option value="step_1_3">Step: 1 (x &lt; 0.5), 3 (x &ge; 0.5)</option>
+                                <option value="abs_shifted">f(x) = |x - 0.5|, x &isin; [0, 1]</option>
+                                <option value="inv_sqrt">f(x) = 1 / &radic;x, x &isin; (0, 1] (Unbounded)</option>
+                                <option value="sinc">f(x) = sin(x) / x, x &isin; [0, &pi;]</option>
+                                <option value="dirichlet">Dirichlet Function (Pathological)</option>
+                                <option value="thomae">Thomae's Function (Popcorn)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="input-partitions">Partitions (N domain / M range):</label>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="range-partitions" min="5" max="500" step="5" value="40">
+                                <input type="number" id="input-partitions" min="5" max="2000" step="5" value="40">
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="input-samples">Lebesgue Domain Samples (K):</label>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="range-samples" min="1000" max="50000" step="1000" value="20000">
+                                <input type="number" id="input-samples" min="1000" max="100000" step="1000" value="20000">
+                            </div>
+                        </div>
+
+                        <button id="btn-run-ex1" class="btn btn-primary btn-full" type="button">
+                            Compute &amp; Compare Integrals
+                        </button>
+
+                        <div class="preset-group">
+                            <button class="btn-chip" data-fn-preset="sin" type="button">sin(x)</button>
+                            <button class="btn-chip" data-fn-preset="inv_sqrt" type="button">1/&radic;x (Unbounded)</button>
+                            <button class="btn-chip" data-fn-preset="dirichlet" type="button">Dirichlet</button>
+                            <button class="btn-chip" data-fn-preset="thomae" type="button">Thomae</button>
+                        </div>
+                    </div>
+
+                    <div class="card card-accent">
+                        <h3>Function Properties</h3>
+                        <p class="small-text" id="fn-notes">-</p>
+                        <table class="stats-table">
+                            <tbody>
+                                <tr>
+                                    <td>Formula:</td>
+                                    <td id="fn-formula" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Exact Integral:</td>
+                                    <td id="fn-exact" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Riemann Integrable:</td>
+                                    <td id="fn-riemann-ok" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Lebesgue Integrable:</td>
+                                    <td id="fn-lebesgue-ok" class="mono">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </aside>
+
+                <main class="content">
+                    <!-- Metrics Bar -->
+                    <div class="metrics-bar">
+                        <div class="metric-card">
+                            <span class="metric-label">Exact Analytical Value</span>
+                            <span class="metric-value" id="m1-exact">-</span>
+                            <span class="metric-sub" id="m1-exact-sub">Reference ground truth</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Riemann (Midpoint)</span>
+                            <span class="metric-value" id="m1-riemann-mid">-</span>
+                            <span class="metric-sub" id="m1-riemann-mid-sub">-</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Riemann (Left Endpoint)</span>
+                            <span class="metric-value" id="m1-riemann-left">-</span>
+                            <span class="metric-sub" id="m1-riemann-left-sub">-</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Lebesgue (Level-Set)</span>
+                            <span class="metric-value" id="m1-lebesgue">-</span>
+                            <span class="metric-sub" id="m1-lebesgue-sub">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Riemann Partitioning (Domain [a, b])</h4>
+                                <span class="chart-tag">&Sigma; f(x<sub>i</sub>*) &Delta;x</span>
+                            </div>
+                            <div id="chart-riemann-vis" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Lebesgue Partitioning (Range Level Sets)</h4>
+                                <span class="chart-tag">&Sigma; y<sub>k</sub> &mu;(f<sup>-1</sup>([y<sub>k</sub>, y<sub>k+1</sub>)))</span>
+                            </div>
+                            <div id="chart-lebesgue-vis" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Error Convergence vs. Partitions</h4>
+                                <span class="chart-tag">|I<sub>approx</sub> - I<sub>exact</sub>| (Log Scale)</span>
+                            </div>
+                            <div id="chart-int-convergence" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Computational Cost Comparison</h4>
+                                <span class="chart-tag">Execution Time (ms)</span>
+                            </div>
+                            <div id="chart-int-timing" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Discussion Card -->
+                    <div class="conclusion-card">
+                        <h3>Comparative Analysis: Riemann vs. Lebesgue Integration</h3>
+
+                        <div class="conclusion-block">
+                            <h4>
+                                <span>1. Accuracy, Convergence &amp; Computational Efficiency</span>
+                                <span class="badge" id="badge-ex1-conv">N = M = 40</span>
+                            </h4>
+                            <p id="ex1-analysis-accuracy">-</p>
+                        </div>
+
+                        <div class="conclusion-block">
+                            <h4>
+                                <span>2. When Do They Agree vs. Behave Differently?</span>
+                                <span class="badge">Measure Theory vs. Darboux Sums</span>
+                            </h4>
+                            <p id="ex1-analysis-behavior">-</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- EXERCISE 2: NUMERICAL COMPUTATION OF THE NORMAL CDF       -->
+        <!-- ========================================================= -->
+        <section id="pane-ex2" class="tab-pane">
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="card">
+                        <h3>Evaluation Parameters</h3>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="input-x">Evaluation Point (x):</label>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="range-x" min="-6.0" max="6.0" step="0.05" value="1.96">
+                                <input type="number" id="input-x" min="-10" max="10" step="0.01" value="1.96">
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="input-quad-n">Quadrature Subintervals (N):</label>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="range-quad-n" min="10" max="1000" step="10" value="100">
+                                <input type="number" id="input-quad-n" min="10" max="10000" step="10" value="100">
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-header">
+                                <label for="input-series-k">Power Series Max Terms (K):</label>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="range-series-k" min="5" max="80" step="5" value="40">
+                                <input type="number" id="input-series-k" min="5" max="150" step="5" value="40">
+                            </div>
+                        </div>
+
+                        <button id="btn-run-ex2" class="btn btn-primary btn-full" type="button">
+                            Evaluate Normal CDF &Phi;(x)
+                        </button>
+
+                        <div class="preset-group">
+                            <button class="btn-chip" data-x-preset="0" type="button">x = 0.0</button>
+                            <button class="btn-chip" data-x-preset="1.96" type="button">x = 1.96</button>
+                            <button class="btn-chip" data-x-preset="-2.576" type="button">x = -2.576</button>
+                            <button class="btn-chip" data-x-preset="5.5" type="button">x = 5.5 (Cancellation)</button>
+                        </div>
+                    </div>
+
+                    <div class="card card-accent">
+                        <h3>Analytical Summary at x</h3>
+                        <p class="small-text">Standard Normal N(0, 1) properties at the selected point:</p>
+                        <table class="stats-table">
+                            <tbody>
+                                <tr>
+                                    <td>Point x:</td>
+                                    <td id="cdf-summary-x" class="mono">1.9600</td>
+                                </tr>
+                                <tr>
+                                    <td>PDF &phi;(x):</td>
+                                    <td id="cdf-summary-pdf" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Reference &Phi;(x):</td>
+                                    <td id="cdf-summary-phi" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Upper Tail 1 - &Phi;(x):</td>
+                                    <td id="cdf-summary-tail" class="mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Abramowitz-Stegun (7.1.26):</td>
+                                    <td id="cdf-summary-as" class="mono">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="series-warning-box" class="notice-box" style="display: none;">
+                            <strong>Catastrophic Cancellation Alert:</strong> For |x| &gt; 4.5, alternating terms in the
+                            Maclaurin power series grow large before decaying, losing floating-point digits!
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="content">
+                    <!-- Metrics Bar -->
+                    <div class="metrics-bar">
+                        <div class="metric-card">
+                            <span class="metric-label">Hybrid erf / CF Reference</span>
+                            <span class="metric-value" id="m2-ref">-</span>
+                            <span class="metric-sub" id="m2-ref-sub">Machine precision (~10<sup>-16</sup>)</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Simpson's Rule</span>
+                            <span class="metric-value" id="m2-simpson">-</span>
+                            <span class="metric-sub" id="m2-simpson-sub">-</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Trapezoidal Rule</span>
+                            <span class="metric-value" id="m2-trap">-</span>
+                            <span class="metric-sub" id="m2-trap-sub">-</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Maclaurin Power Series</span>
+                            <span class="metric-value" id="m2-series">-</span>
+                            <span class="metric-sub" id="m2-series-sub">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Standard Normal Density &phi;(t) &amp; Area &Phi;(x)</h4>
+                                <span class="chart-tag">P(Z &le; x)</span>
+                            </div>
+                            <div id="chart-norm-pdf" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Absolute Error Profile Across x &isin; [-5, 5]</h4>
+                                <span class="chart-tag">|&Phi;<sub>approx</sub> - &Phi;<sub>ref</sub>| (Log Scale)</span>
+                            </div>
+                            <div id="chart-norm-errors" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Quadrature Convergence (Trapezoidal vs. Simpson)</h4>
+                                <span class="chart-tag">O(1/N&sup2;) vs O(1/N&sup4;)</span>
+                            </div>
+                            <div id="chart-norm-quad-conv" class="chart-container"></div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <div class="chart-header">
+                                <h4 class="chart-title">Power Series Partial Sums at Current x</h4>
+                                <span class="chart-tag">Convergence / Cancellation</span>
+                            </div>
+                            <div id="chart-norm-series-conv" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Reference Table -->
+                    <div class="card">
+                        <h3>Benchmark Against Trusted 15-Digit Reference Values (NIST / SciPy)</h3>
+                        <p class="small-text">
+                            Comparing all implemented methods at standard statistical points using N = <span id="tbl-n">100</span> subintervals and K = <span id="tbl-k">40</span> series terms:
+                        </p>
+                        <div class="data-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>x</th>
+                                        <th>Trusted Reference &Phi;(x)</th>
+                                        <th>Hybrid erf/CF Err</th>
+                                        <th>Simpson Err</th>
+                                        <th>Trapezoidal Err</th>
+                                        <th>Power Series Err</th>
+                                        <th>A&amp;S (7.1.26) Err</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cdf-ref-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Theoretical Explanations -->
+                    <div class="conclusion-card">
+                        <h3>Theoretical Analysis: Liouville's Theorem, erf(z) &amp; Numerical Methods</h3>
+
+                        <div class="conclusion-block">
+                            <h4>
+                                <span>1. Why &Phi;(x) Has No Elementary Antiderivative (Liouville's Theorem)</span>
+                                <span class="badge">Differential Algebra (1835)</span>
+                            </h4>
+                            <p>
+                                The standard normal CDF requires integrating <i>f(t) = e<sup>-t&sup2;/2</sup></i>. By
+                                <b>Liouville's Theorem</b> in differential algebra (Joseph Liouville, 1835; later formalized by the
+                                Risch algorithm), an integral of the form <i>&int; g(t) e<sup>h(t)</sup> dt</i> with rational
+                                functions <i>g, h</i> is elementary if and only if there exists a rational function <i>R(t)</i>
+                                satisfying the differential equation <b>R'(t) + R(t)h'(t) = g(t)</b>.
+                                For <i>g(t) = 1</i> and <i>h(t) = -t&sup2;/2</i>, this requires <b>R'(t) - t R(t) = 1</b>.
+                                Examining poles and polynomial degrees shows no rational function can satisfy this identity:
+                                any pole of <i>R</i> would increase in order upon differentiation, and any polynomial <i>R</i> of
+                                degree <i>d &ge; 0</i> yields degree <i>d + 1 &ge; 1</i> for <i>t R(t)</i>, which cannot equal
+                                the constant <i>1</i>. Therefore, &Phi;(x) cannot be expressed in finite terms of elementary functions.
+                            </p>
+                        </div>
+
+                        <div class="conclusion-block">
+                            <h4>
+                                <span>2. Exact Representation via the Error Function erf(z) &amp; Need for Numerical Methods</span>
+                                <span class="badge">&Phi;(x) = &frac12;[1 + erf(x/&radic;2)]</span>
+                            </h4>
+                            <p>
+                                Introducing the non-elementary special function <b>erf(z) = (2 / &radic;&pi;) &int;<sub>0</sub><sup>z</sup> e<sup>-u&sup2;</sup> du</b>
+                                provides an exact analytical representation:
+                                <b>&Phi;(x) = &frac12;[1 + erf(x / &radic;2)]</b>.
+                                However, defining a special function merely gives a canonical name to the integral&mdash;it does not
+                                supply a closed-form arithmetic formula to evaluate it on a computer. Thus, practical computation
+                                still relies on numerical methods: composite quadrature (Simpson's rule), Taylor/Maclaurin series
+                                near the origin, continued fractions (Jacobi/Legendre) or rational Chebyshev approximations (Cody, 1969)
+                                in the tails to achieve machine precision without floating-point cancellation.
+                            </p>
+                        </div>
+
+                        <div class="conclusion-block">
+                            <h4>
+                                <span>3. Accuracy &amp; Efficiency Trade-offs Across Methods</span>
+                                <span class="badge" id="badge-ex2-perf">Performance &amp; Precision</span>
+                            </h4>
+                            <p id="ex2-analysis-perf">-</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </section>
+    </div>
+
+    <!-- Theoretical Guide Modal -->
+    <div class="modal-backdrop" id="help-modal">
+        <div class="modal-box">
+            <h2>Theoretical Background: Integration &amp; Normal CDF</h2>
+
+            <h3>1. Riemann vs. Lebesgue Integration</h3>
+            <p>
+                <b>Riemann Integration</b> partitions the <i>domain</i> [a, b] into subintervals [x<sub>i</sub>, x<sub>i+1</sub>]
+                and forms sums &Sigma; f(x<sub>i</sub>*) &Delta;x<sub>i</sub>. It works well for piecewise continuous functions,
+                but fails on highly oscillatory indicator functions like the <b>Dirichlet function</b> (where upper Darboux sums
+                equal 1 and lower Darboux sums equal 0) and requires improper limits for unbounded functions like 1/&radic;x.
+            </p>
+            <p>
+                <b>Lebesgue Integration</b> partitions the <i>range</i> [y<sub>min</sub>, y<sub>max</sub>] into measurable
+                intervals [y<sub>k</sub>, y<sub>k+1</sub>) and measures the preimage E<sub>k</sub> = f<sup>-1</sup>([y<sub>k</sub>, y<sub>k+1</sub>))
+                in the domain: &Sigma; y<sub>k</sub> &mu;(E<sub>k</sub>). Because countable sets like &rationals; &cap; [0, 1]
+                have Lebesgue measure zero, the Dirichlet function has Lebesgue integral 0.
+            </p>
+
+            <h3>2. Numerical Methods for &Phi;(x)</h3>
+            <ul>
+                <li>
+                    <b>Trapezoidal &amp; Simpson's Rules:</b> Composite quadrature integrates &phi;(t) from 0 to |x| with
+                    global error O(1/N&sup2;) and O(1/N&sup4;), respectively. Because &phi;(t) is smooth (C<sup>&infin;</sup>),
+                    Simpson's rule reaches ~10<sup>-10</sup> accuracy with just N = 100 subintervals.
+                </li>
+                <li>
+                    <b>Maclaurin Power Series:</b> Converges super-exponentially near x = 0, but suffers from severe
+                    <b>catastrophic cancellation</b> for |x| &ge; 5 as alternating terms reach magnitudes &gg; 10<sup>6</sup>
+                    before decaying.
+                </li>
+                <li>
+                    <b>Hybrid Series + Continued Fraction (erf/erfc):</b> Evaluates the Maclaurin series for |z| &le; 2 and
+                    the Jacobi continued fraction for erfc(z) for |z| &gt; 2, achieving full 64-bit IEEE 754 precision
+                    (~10<sup>-16</sup>) across the entire real line in O(1) time.
+                </li>
+            </ul>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-primary" id="btn-close-modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/integration.js"></script>
+    <script src="js/normal_cdf.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
+
