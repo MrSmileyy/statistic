@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(212, 168, 83, 0.08), transparent 36%),
+      radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.07), transparent 40%),
+      linear-gradient(to right, rgba(43, 58, 85, 0.14) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(43, 58, 85, 0.14) 1px, transparent 1px);
+    background-size: auto, auto, 32px 32px, 32px 32px;
+  }
+}
+
+@layer components {
+  .bletchley-card {
+    @apply rounded-xl border border-bletchley-border bg-bletchley-panel/90 shadow-panel backdrop-blur-sm;
+  }
+
+  .bletchley-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-bletchley-border bg-bletchley-card px-3 py-1 font-mono text-xs text-bletchley-parchment;
+  }
+
+  /* Hardwood oiled oak Enigma outer field box */
+  .wood-cabinet {
+    background:
+      repeating-linear-gradient(
+        92deg,
+        rgba(255, 210, 150, 0.025) 0px,
+        rgba(255, 210, 150, 0.025) 2px,
+        rgba(0, 0, 0, 0.16) 2px,
+        rgba(0, 0, 0, 0.16) 7px
+      ),
+      linear-gradient(155deg, #4b3019 0%, #311d0e 48%, #211308 100%);
+    box-shadow:
+      0 26px 60px -15px rgba(0, 0, 0, 0.9),
+      inset 0 2px 4px rgba(255, 224, 178, 0.2),
+      inset 0 -4px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Authentic WWII black crackle-enameled iron inner Enigma chassis */
+  .enigma-chassis {
+    background-color: #101114;
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 0),
+      radial-gradient(rgba(0, 0, 0, 0.45) 1px, transparent 0),
+      linear-gradient(180deg, #17181c 0%, #0d0e11 100%);
+    background-size: 6px 6px, 6px 6px, 100% 100%;
+    background-position: 0 0, 3px 3px, 0 0;
+    box-shadow:
+      inset 0 3px 12px rgba(0, 0, 0, 0.92),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Knurled metal notched rotor thumbwheel texture */
+  .knurled-wheel {
+    background: repeating-linear-gradient(
+      to bottom,
+      #cbd5e1 0px,
+      #94a3b8 2px,
+      #1e293b 3px,
+      #0f172a 6px
+    );
+    box-shadow:
+      inset 2px 0 4px rgba(0, 0, 0, 0.8),
+      inset -2px 0 4px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Vintage perforated telegraph paper ticker strip */
+  .paper-tape {
+    background: linear-gradient(180deg, #f3ebd7 0%, #e7dcc2 100%);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Custom thin scrollbars for cryptographic logs and tables */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070b14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b3a55;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8c6d32;
+}
