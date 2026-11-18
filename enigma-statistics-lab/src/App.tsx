@@ -9,6 +9,7 @@ import { ExamTheoryPanel } from './components/exam/ExamTheoryPanel';
 import { Footer } from './components/layout/Footer';
 import { type AppTab, Navbar } from './components/layout/Navbar';
 import { StatisticsWizardPanel } from './components/statistics/StatisticsWizardPanel';
+import { DecryptionWalkthroughPanel } from './components/walkthrough/DecryptionWalkthroughPanel';
 import type {
   EnigmaConfig,
   Language,
@@ -25,7 +26,7 @@ function computeInitialCiphertext(presetIndex = 0): string {
 export function App() {
   const defaultPreset = HISTORICAL_PRESETS[0];
 
-  const [language, setLanguage] = useState<Language>('it');
+  const language: Language = 'en';
   const [activeTab, setActiveTab] = useState<AppTab>('enigma');
   const [machineFullscreen, setMachineFullscreen] = useState<boolean>(false);
   const [selectedPresetId, setSelectedPresetId] = useState<string>(defaultPreset.id);
@@ -165,6 +166,21 @@ export function App() {
     setActiveTab('enigma');
   };
 
+  const handleOpenWalkthroughInEnigma = (
+    presetId: string,
+    config: EnigmaConfig,
+    ciphertext: string
+  ) => {
+    handleSelectPreset(presetId);
+    const decrypted = new EnigmaM3(config).encryptText(ciphertext).ciphertext;
+    setEnigmaConfig(config);
+    setSavedGround(config.rotorPositions);
+    setBatchInput(ciphertext);
+    setBatchOutput(decrypted);
+    setLastTrace(null);
+    setActiveTab('enigma');
+  };
+
   const statisticalReport = useMemo(
     () => computeStatisticalReport(statsSampleText, targetLanguage),
     [statsSampleText, targetLanguage]
@@ -194,8 +210,6 @@ export function App() {
         <Navbar
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          language={language}
-          onToggleLanguage={() => setLanguage((l) => (l === 'it' ? 'en' : 'it'))}
           selectedPresetId={selectedPresetId}
           onSelectPreset={handleSelectPreset}
         />
@@ -295,6 +309,22 @@ export function App() {
             onLoadGuidedDemo={handleSelectPreset}
             onConfigChange={setEnigmaConfig}
             onApplyStopToEnigma={(pos, plugs) => handleApplyKeyToEnigma(pos, plugs)}
+          />
+        )}
+
+        {activeTab === 'walkthrough' && (
+          <DecryptionWalkthroughPanel
+            selectedPresetId={selectedPresetId}
+            onSelectPreset={handleSelectPreset}
+            onOpenInEnigma={handleOpenWalkthroughInEnigma}
+            onOpenInBombe={(presetId) => {
+              handleSelectPreset(presetId);
+              setActiveTab('bombe');
+            }}
+            onOpenInStats={(presetId) => {
+              handleSelectPreset(presetId);
+              setActiveTab('statistics');
+            }}
           />
         )}
 

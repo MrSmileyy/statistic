@@ -1,22 +1,16 @@
 import React from 'react';
-import { Language } from '../../types';
-import { getTranslations } from '../../i18n/translations';
+import type { Language } from '../../types';
 
 interface FooterProps {
-  language: Language;
+  language?: Language;
 }
 
-export const Footer: React.FC<FooterProps> = ({ language }) => {
-  const t = getTranslations(language);
-
+export const Footer: React.FC<FooterProps> = () => {
   return (
-    <footer className="mt-12 border-t border-zinc-800/80 bg-[#090a0d] py-6 text-xs text-zinc-500">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 sm:flex-row sm:px-6">
-        <div className="flex items-center gap-2 font-mono text-zinc-400">
-          <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
-          <span>Enigma M3 / Turing-Welchman Bombe / Statistical Cryptanalysis Lab</span>
-        </div>
-        <div className="text-center sm:text-right">{t.footer.text}</div>
+    <footer className="mt-10 border-t border-zinc-800/80 bg-[#090a0d] py-4 text-xs text-zinc-500">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 font-mono text-[11px] sm:flex-row sm:px-6">
+        <span>Enigma M3 &amp; Cryptanalysis</span>
+        <span>Reference vector: I-II-III, UKW-B, Rings 01-01-01, AAA &rarr; AAAAA = BDZGO</span>
       </div>
     </footer>
   );

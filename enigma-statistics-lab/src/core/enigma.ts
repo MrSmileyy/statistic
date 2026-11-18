@@ -79,10 +79,6 @@ function passBackward(rotorId: RotorId, idx: number, pos: number, ring: number):
   return (exited - shift + ALPHABET_SIZE) % ALPHABET_SIZE;
 }
 
-/**
- * Pure object-oriented Enigma M3 cipher engine supporting single-key signal tracing
- * as well as static scrambler precomputation for Bombe and statistical sweeps.
- */
 export class EnigmaM3 {
   private config: EnigmaConfig;
   private plugMap: Int32Array;
@@ -260,10 +256,6 @@ export class EnigmaM3 {
   }
 }
 
-/**
- * Zero-allocation fast Enigma decryption kernel used inside Web Worker sweeps.
- * Steps strictly identically to EnigmaM3.encryptChar across cipherIndices.
- */
 export function decryptIndicesFast(
   cipherIndices: Uint8Array,
   rotors: readonly [RotorId, RotorId, RotorId],

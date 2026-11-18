@@ -430,13 +430,18 @@ export function inspectBombeHypotheses(
   rotors: readonly [RotorId, RotorId, RotorId],
   reflector: ReflectorId,
   ringSettings: readonly [number, number, number],
-  positions: readonly [number, number, number]
+  positions: readonly [number, number, number],
+  customRegisterIdx: number = menu.testRegisterIdx
 ): BombeHypothesisTrace[] {
   const ws = createBombeWorkspace(menu);
   populateMenuScramblers(ws, rotors, reflector, ringSettings, positions);
 
   const { board, queueU, queueP, edgeHead, edgeTo, edgeSlot, edgeNext, scramblers } = ws;
   const traces: BombeHypothesisTrace[] = [];
+  const regIdx =
+    customRegisterIdx >= 0 && customRegisterIdx < ALPHABET_SIZE
+      ? customRegisterIdx
+      : menu.testRegisterIdx;
 
   for (let h = 0; h < ALPHABET_SIZE; h++) {
     board.fill(0);
@@ -453,8 +458,8 @@ export function inspectBombeHypotheses(
       }
     };
 
-    enqueue(menu.testRegisterIdx, h);
-    enqueue(h, menu.testRegisterIdx);
+    enqueue(regIdx, h);
+    enqueue(h, regIdx);
 
     while (qHead < qTail) {
       const u = queueU[qHead];

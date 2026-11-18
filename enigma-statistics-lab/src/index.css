@@ -8,22 +8,94 @@
   }
 
   body {
-    background-image:
-      radial-gradient(circle at 15% 10%, rgba(212, 168, 83, 0.08), transparent 36%),
-      radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.07), transparent 40%),
-      linear-gradient(to right, rgba(43, 58, 85, 0.14) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(43, 58, 85, 0.14) 1px, transparent 1px);
-    background-size: auto, auto, 32px 32px, 32px 32px;
+    margin: 0;
+    padding: 0;
+    background-color: #090b10;
+    color: #f4f4f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
   }
 }
 
 @layer components {
+  .hw-card {
+    @apply rounded-lg border border-zinc-800 bg-[#0d0e12] p-4;
+  }
+
+  .hw-conclusion-card {
+    @apply rounded-lg border border-zinc-800 border-l-4 border-l-amber-500/80 bg-[#0d0e12] p-5;
+  }
+
+  .hw-metric-card {
+    @apply flex flex-col rounded-lg border border-zinc-800 bg-[#0d0e12] p-3 font-mono;
+  }
+
+  .hw-metric-label {
+    @apply mb-1 text-[11px] uppercase tracking-wider text-zinc-500;
+  }
+
+  .hw-metric-value {
+    @apply text-lg font-bold text-zinc-100;
+  }
+
+  .hw-metric-sub {
+    @apply mt-0.5 text-[11px] text-zinc-500;
+  }
+
+  .hw-btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded border px-3 py-1.5 font-mono text-xs font-semibold transition;
+  }
+
+  .hw-btn-primary {
+    @apply border-amber-500/50 bg-amber-500 text-zinc-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .hw-btn-secondary {
+    @apply border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .hw-pill-btn {
+    @apply inline-flex items-center justify-center rounded border border-zinc-700 bg-[#08090c] px-2.5 py-1 font-mono text-xs text-zinc-300 transition hover:border-zinc-500 hover:text-white;
+  }
+
+  .hw-pill-btn.active {
+    @apply border-amber-500/60 bg-zinc-800 font-semibold text-amber-300;
+  }
+
+  .hw-input {
+    @apply rounded border border-zinc-700 bg-[#08090c] p-2.5 font-mono text-xs text-zinc-100 focus:border-amber-500 focus:outline-none;
+  }
+
+  .hw-select {
+    @apply rounded border border-zinc-700 bg-[#08090c] px-2.5 py-1 font-mono text-xs text-zinc-200 focus:border-amber-500 focus:outline-none;
+  }
+
+  .hw-badge {
+    @apply inline-flex items-center gap-1 rounded border border-zinc-800 bg-[#08090c] px-2 py-0.5 font-mono text-[11px] text-zinc-300;
+  }
+
+  .hw-table {
+    @apply w-full border-collapse text-left font-mono text-xs;
+  }
+
+  .hw-table th {
+    @apply border-b border-zinc-800 bg-[#0d0e12] px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400;
+  }
+
+  .hw-table td {
+    @apply border-b border-zinc-800/60 px-3 py-1.5 text-zinc-300;
+  }
+
+  .hw-table tr:hover td {
+    @apply bg-zinc-900/60;
+  }
+
   .bletchley-card {
-    @apply rounded-xl border border-bletchley-border bg-bletchley-panel/90 shadow-panel backdrop-blur-sm;
+    @apply rounded-lg border border-zinc-800 bg-[#0d0e12];
   }
 
   .bletchley-pill {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-bletchley-border bg-bletchley-card px-3 py-1 font-mono text-xs text-bletchley-parchment;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#08090c] px-3 py-1 font-mono text-xs text-zinc-300;
   }
 
   /* Hardwood oiled oak Enigma outer field box */
@@ -87,14 +159,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #070b14;
+  background: #090b10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2b3a55;
+  background: #27272a;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8c6d32;
+  background: #52525b;
 }
+

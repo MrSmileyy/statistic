@@ -4,6 +4,7 @@ import { ALPHABET } from '../../core/constants';
 import { TRANSLATIONS } from '../../i18n/translations';
 import { enigmaAudio } from '../../utils/enigmaAudio';
 import type { Language, PlugPair } from '../../types';
+import { InfoTooltip } from '../common/InfoTooltip';
 
 interface PlugboardCablesSVGProps {
   plugboard: PlugPair[];
@@ -116,8 +117,13 @@ export const PlugboardCablesSVG: React.FC<PlugboardCablesSVGProps> = ({
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Cable className="h-3.5 w-3.5 text-bletchley-brass" />
-          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">
+          <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">
             {language === 'it' ? 'Pannello Cavi' : 'Plugboard'} ({plugboard.length}/13)
+            <InfoTooltip
+              title="Steckerbrett (Plugboard)"
+              text="Click any two sockets to connect or disconnect a patch cable (up to 13 pairs). Each cable swaps those two letters both before entering and after exiting the rotors."
+              align="left"
+            />
           </span>
           {pendingLetter && (
             <span className="animate-pulse rounded border border-amber-400/60 bg-amber-500/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-amber-300">

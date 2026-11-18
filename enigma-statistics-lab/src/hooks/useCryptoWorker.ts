@@ -9,10 +9,6 @@ interface WorkerProgressState {
   error: string | null;
 }
 
-/**
- * React hook managing a dedicated Web Worker instance for heavy 17,576-position
- * Bombe and statistical ciphertext-only sweeps without freezing the main UI thread.
- */
 export function useCryptoWorker(onComplete: (response: WorkerResponse) => void) {
   const workerRef = useRef<Worker | null>(null);
   const activeRequestIdRef = useRef<string | null>(null);

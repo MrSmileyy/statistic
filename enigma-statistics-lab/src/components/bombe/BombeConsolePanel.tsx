@@ -18,13 +18,14 @@ import type {
   TargetLanguage,
   WorkerResponse,
 } from '../../types';
+import { InfoTooltip } from '../common/InfoTooltip';
 
 interface BombeConsolePanelProps {
   ciphertext: string;
   menu: BombeMenu;
   enigmaConfig: EnigmaConfig;
   targetLanguage: TargetLanguage;
-  language: Language;
+  language?: Language;
   onConfigChange: (next: EnigmaConfig) => void;
   onApplyStopToEnigma: (
     positions: [number, number, number],
@@ -37,11 +38,9 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
   menu,
   enigmaConfig,
   targetLanguage,
-  language,
   onConfigChange,
   onApplyStopToEnigma,
 }) => {
-  const isIt = language === 'it';
   const [stops, setStops] = useState<BombeStop[]>([]);
   const [inspectedPos, setInspectedPos] = useState<[number, number, number]>(
     enigmaConfig.rotorPositions
@@ -105,33 +104,27 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-xl border border-zinc-800 bg-[#0d0e12] p-4 shadow-panel sm:p-5">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
-          <div>
-            <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-zinc-100">
-              {isIt
-                ? 'Fase 3 - Scansione delle 17.576 posizioni dei rotori'
-                : 'Phase 3 - 17,576 Rotor Position Scan'}
-            </h3>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              {isIt
-                ? 'Verifica tutte le combinazioni da AAA a ZZZ e conserva solo quelle prive di contraddizioni.'
-                : 'Tests every combination from AAA to ZZZ and keeps only contradiction-free rotor positions.'}
-            </p>
-          </div>
+      <section className="rounded-lg border border-zinc-800 bg-[#0d0e12] p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-2.5">
+          <h3 className="flex items-center font-mono text-sm font-bold text-zinc-100">
+            <span>Bombe Rotor Sweep (17,576 positions)</span>
+            <InfoTooltip
+              title="Full Turing-Welchman Bombe Sweep"
+              text="Scans all 17,576 rotor start positions (AAA–ZZZ) on the Diagonal Board in a background Web Worker. Any position where at least one stecker hypothesis avoids contradictions is recorded as a Stop."
+              align="left"
+            />
+          </h3>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap items-center gap-1.5 rounded border border-zinc-700 bg-[#08090c] px-2.5 py-1.5">
-              <span className="font-mono text-[11px] uppercase text-zinc-400">
-                {isIt ? 'Rotori:' : 'Rotors:'}
-              </span>
+            <div className="flex flex-wrap items-center gap-1.5 rounded border border-zinc-700 bg-[#08090c] px-2.5 py-1">
+              <span className="font-mono text-xs text-zinc-400">Rotors:</span>
               {([0, 1, 2] as const).map((slot) => (
                 <select
                   key={slot}
                   value={enigmaConfig.rotors[slot]}
                   aria-label={`Bombe rotor slot ${slot + 1}`}
                   onChange={(e) => handleWheelChange(slot, e.target.value as RotorId)}
-                  className="rounded border border-zinc-700 bg-zinc-900 px-1.5 py-0.5 font-mono text-xs font-bold text-bletchley-brass-bright"
+                  className="rounded border border-zinc-700 bg-zinc-900 px-1.5 py-0.5 font-mono text-xs font-bold text-amber-300"
                 >
                   {ROTOR_IDS.map((id) => (
                     <option key={id} value={id}>
@@ -141,9 +134,7 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                 </select>
               ))}
 
-              <span className="ml-1 font-mono text-[11px] uppercase text-zinc-400">
-                UKW:
-              </span>
+              <span className="ml-1 font-mono text-xs text-zinc-400">UKW:</span>
               <select
                 value={enigmaConfig.reflector}
                 aria-label="Bombe reflector"
@@ -168,38 +159,36 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                 type="button"
                 disabled={!menu.isValidAlignment || menu.edges.length === 0}
                 onClick={handleRunBombe}
-                className="rounded border border-bletchley-brass bg-bletchley-brass px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-zinc-950 transition hover:bg-bletchley-brass-bright disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded border border-amber-500/50 bg-amber-500 px-3.5 py-1.5 font-mono text-xs font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {isIt ? 'Avvia scansione' : 'Start scan'}
+                Run Bombe Sweep
               </button>
             ) : (
               <button
                 type="button"
                 onClick={worker.cancelJob}
-                className="rounded border border-rose-500/60 bg-rose-950/60 px-4 py-1.5 font-mono text-xs font-bold uppercase text-rose-200"
+                className="rounded border border-rose-500/60 bg-rose-950/60 px-3.5 py-1.5 font-mono text-xs font-semibold text-rose-200"
               >
-                {isIt ? 'Interrompi' : 'Stop'}
+                Stop
               </button>
             )}
           </div>
         </div>
 
-        {/* Progress Bar */}
         {(worker.running || worker.tested > 0) && (
-          <div className="mb-4">
+          <div className="mb-3 rounded border border-zinc-800 bg-[#08090c] p-2.5">
             <div className="mb-1 flex justify-between font-mono text-xs text-zinc-400">
               <span>
-                {worker.tested.toLocaleString()} / {worker.total.toLocaleString()}{' '}
-                {isIt ? 'posizioni verificate' : 'positions tested'}
+                {worker.tested.toLocaleString()} / {worker.total.toLocaleString()} tested
               </span>
               <span>
                 {progressPct}% ({worker.elapsedMs.toFixed(0)} ms)
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded bg-[#08090c]">
+            <div className="h-1.5 overflow-hidden rounded bg-zinc-900">
               <div
                 style={{ width: `${progressPct}%` }}
-                className="h-full bg-bletchley-brass transition-all duration-150"
+                className="h-full bg-amber-500 transition-all duration-150"
               />
             </div>
           </div>
@@ -211,38 +200,28 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
           </div>
         )}
 
-        {/* Primary Candidate Readout on Telegraph Paper Strip */}
         {topStop && (
-          <div className="mb-4 rounded border border-zinc-700 bg-[#08090c] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
-              <div className="flex flex-wrap items-center gap-4 font-mono text-xs">
-                <div>
-                  <span className="text-zinc-500">
-                    {isIt ? 'POSIZIONE ROTORI: ' : 'ROTOR POSITION: '}
-                  </span>
-                  <strong className="text-base text-bletchley-brass-bright">
-                    {topStop.positionLabel.split('').join(' - ')}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-zinc-500">
-                    {isIt ? 'CAVI INDIVIDUATI: ' : 'PLUGBOARD: '}
-                  </span>
+          <div className="mb-3 rounded border border-zinc-700 bg-[#08090c] p-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-4 font-mono text-xs text-zinc-300">
+                <span>
+                  Top Stop: <strong className="text-amber-300">{topStop.positionLabel}</strong>
+                </span>
+                <span>
+                  Plugboard:{' '}
                   <strong className="text-emerald-300">
                     {topStop.deducedPlugboard.length > 0
-                      ? topStop.deducedPlugboard.map(([a, b]) => `${a}${b}`).join('  ')
-                      : isIt
-                        ? 'nessuno'
-                        : 'none'}
+                      ? topStop.deducedPlugboard.map(([a, b]) => `${a}${b}`).join(' ')
+                      : 'none'}
                   </strong>
-                </div>
-                <div>
-                  <span className="text-zinc-500">DECIBAN: </span>
-                  <strong className="text-zinc-200">
+                </span>
+                <span>
+                  Decibans:{' '}
+                  <strong className="text-zinc-100">
                     {topStop.decibans >= 0 ? '+' : ''}
-                    {topStop.decibans.toFixed(1)}
+                    {topStop.decibans.toFixed(1)} dB
                   </strong>
-                </div>
+                </span>
               </div>
 
               <button
@@ -250,74 +229,69 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                 onClick={() =>
                   onApplyStopToEnigma(topStop.positions, topStop.deducedPlugboard)
                 }
-                className="rounded border border-bletchley-brass bg-bletchley-brass px-3.5 py-1.5 font-mono text-xs font-bold uppercase text-zinc-950 transition hover:bg-bletchley-brass-bright"
+                className="rounded border border-amber-500/50 bg-amber-500/15 px-3 py-1 font-mono text-xs font-semibold text-amber-300 hover:bg-amber-500/25"
               >
-                {isIt ? 'Imposta chiave su Enigma' : 'Apply key to Enigma'}
+                Apply Key to Enigma
               </button>
             </div>
 
-            <div className="mt-3">
-              <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-                {isIt ? 'Uscita decifrata su nastro' : 'Decrypted tape output'}
-              </div>
-              <div className="paper-tape overflow-x-auto rounded border border-[#c7b998] px-3 py-2 font-mono text-xs font-bold tracking-widest text-zinc-900">
-                {topStop.decryptedPreview}
-              </div>
+            <div className="mt-2 overflow-x-auto rounded border border-zinc-800 bg-[#0d0e12] px-3 py-2 font-mono text-xs tracking-wider text-zinc-200">
+              {topStop.decryptedPreview}
             </div>
           </div>
         )}
 
-        {/* Candidate Stops Table */}
         <div>
-          <div className="mb-2 font-mono text-[11px] uppercase tracking-wider text-zinc-400">
-            {isIt
-              ? `Posizioni compatibili trovate (${stops.length})`
-              : `Compatible positions found (${stops.length})`}
+          <div className="mb-2 inline-flex items-center font-mono text-xs text-zinc-400">
+            Candidate Stops ({stops.length})
+            <InfoTooltip
+              title="Bombe Stops"
+              text="Surviving rotor positions sorted by Deciban likelihood. Click '26×26 Board' to inspect the Diagonal Board proof or 'Apply' to set that key on the Enigma machine."
+              align="left"
+            />
           </div>
           {stops.length === 0 ? (
-            <div className="rounded border border-dashed border-zinc-800 bg-[#08090c] p-4 text-center font-mono text-xs text-zinc-500">
-              {isIt
-                ? 'Premi "Avvia scansione" per eseguire il controllo sulle 17.576 posizioni.'
-                : 'Press "Start scan" to test all 17,576 rotor positions.'}
+            <div className="rounded border border-zinc-800 bg-[#08090c] p-4 text-center font-mono text-xs text-zinc-500">
+              Click &ldquo;Run Bombe Sweep&rdquo; to test all 17,576 rotor positions.
             </div>
           ) : (
             <div className="overflow-x-auto rounded border border-zinc-800 bg-[#08090c]">
-              <table className="w-full border-collapse text-left font-mono text-xs">
+              <table className="hw-table">
                 <thead>
-                  <tr className="border-b border-zinc-800 bg-zinc-900/70 text-[11px] uppercase text-zinc-400">
-                    <th className="px-3 py-2">{isIt ? 'Posizione' : 'Position'}</th>
-                    <th className="px-3 py-2">{isIt ? 'Cavi dedotti' : 'Cables'}</th>
-                    <th className="px-3 py-2">IoC</th>
-                    <th className="px-3 py-2">Deciban</th>
-                    <th className="px-3 py-2">{isIt ? 'Testo decifrato' : 'Decrypted text'}</th>
-                    <th className="px-3 py-2 text-right">{isIt ? 'Azioni' : 'Actions'}</th>
+                  <tr>
+                    <th>Pos</th>
+                    <th>Deduced Plugboard</th>
+                    <th>IoC</th>
+                    <th>Decibans</th>
+                    <th>Decrypted Preview</th>
+                    <th className="text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stops.map((stop) => (
+                  {stops.map((stop, idx) => (
                     <tr
                       key={stop.positionLabel}
-                      className="border-b border-zinc-800/60 hover:bg-zinc-900/50"
+                      className={idx === 0 ? 'bg-zinc-900/50' : ''}
                     >
-                      <td className="px-3 py-2 font-bold text-bletchley-brass-bright">
+                      <td className="font-bold text-amber-300">
                         {stop.positionLabel}
                       </td>
-                      <td className="max-w-[180px] truncate px-3 py-2 text-emerald-300">
+                      <td className="max-w-[180px] truncate font-bold text-emerald-300">
                         {stop.deducedPlugboard.map(([a, b]) => `${a}${b}`).join(' ') || '-'}
                       </td>
-                      <td className="px-3 py-2 text-zinc-300">{stop.ioc.toFixed(4)}</td>
+                      <td>{stop.ioc.toFixed(4)}</td>
                       <td
-                        className={`px-3 py-2 font-semibold ${
-                          stop.decibans >= 15 ? 'text-emerald-400' : 'text-zinc-400'
-                        }`}
+                        className={
+                          stop.decibans >= 15 ? 'font-bold text-emerald-400' : 'text-zinc-400'
+                        }
                       >
                         {stop.decibans >= 0 ? '+' : ''}
                         {stop.decibans.toFixed(1)}
                       </td>
-                      <td className="max-w-[240px] truncate px-3 py-2 text-zinc-300">
+                      <td className="max-w-[240px] truncate">
                         {stop.decryptedPreview}
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="text-right">
                         <div className="inline-flex gap-1.5">
                           <button
                             type="button"
@@ -329,18 +303,18 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                               }
                               setShowDiagonalDrawer(true);
                             }}
-                            className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300 hover:border-zinc-500"
+                            className="rounded border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[11px] text-zinc-300 hover:border-zinc-500"
                           >
-                            {isIt ? 'Matrice 26x26' : '26x26 Matrix'}
+                            26&times;26 Board
                           </button>
                           <button
                             type="button"
                             onClick={() =>
                               onApplyStopToEnigma(stop.positions, stop.deducedPlugboard)
                             }
-                            className="rounded border border-bletchley-brass/60 bg-bletchley-brass/15 px-2.5 py-1 text-[11px] font-bold text-bletchley-brass-bright hover:bg-bletchley-brass/25"
+                            className="rounded border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[11px] text-amber-300 hover:border-amber-500/60"
                           >
-                            {isIt ? 'Imposta' : 'Apply'}
+                            Apply
                           </button>
                         </div>
                       </td>
@@ -353,40 +327,29 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
         </div>
       </section>
 
-      {/* Collapsible 26x26 Welchman Diagonal Board */}
       {hypothesisTraces.length > 0 && (
-        <section className="rounded-xl border border-zinc-800 bg-[#0d0e12] overflow-hidden">
+        <section className="rounded-lg border border-zinc-800 bg-[#0d0e12] overflow-hidden">
           <button
             type="button"
             onClick={() => setShowDiagonalDrawer((o) => !o)}
-            className="flex w-full items-center justify-between px-4 py-3 text-left transition hover:bg-zinc-900/60"
+            className="flex w-full items-center justify-between px-4 py-3 text-left font-mono text-xs text-zinc-300 hover:bg-zinc-900/50"
           >
-            <div>
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-300">
-                {isIt
-                  ? `Scheda Diagonale 26x26 - Posizione [${formatPositionLabel(inspectedPos)}]`
-                  : `26x26 Diagonal Board - Position [${formatPositionLabel(inspectedPos)}]`}
-              </span>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                {isIt
-                  ? 'Mostra la propagazione elettrica per le 26 ipotesi sulla lettera centrale.'
-                  : 'Shows electrical propagation across all 26 hypotheses on the central letter.'}
-              </p>
-            </div>
-            <span className="font-mono text-xs text-zinc-400">
-              {showDiagonalDrawer
-                ? isIt
-                  ? 'Chiudi'
-                  : 'Hide'
-                : isIt
-                  ? 'Apri'
-                  : 'Open'}
+            <span className="inline-flex items-center font-bold">
+              26&times;26 Welchman Diagonal Board [{formatPositionLabel(inspectedPos)}]
+              <InfoTooltip
+                title="Welchman's Diagonal Board"
+                text="A 26×26 electrical symmetry grid enforcing S(u) = v ⇔ S(v) = u. If any row lights up 2+ green/red squares (multiple conflicting wires), that hypothesis is physically impossible."
+                align="left"
+              />
+            </span>
+            <span className="text-zinc-500">
+              {showDiagonalDrawer ? 'Hide' : 'Show'}
             </span>
           </button>
 
           {showDiagonalDrawer && (
-            <div className="border-t border-zinc-800 p-4 sm:p-5">
-              <div className="mb-4 grid grid-cols-7 gap-1 sm:grid-cols-[repeat(13,minmax(0,1fr))]">
+            <div className="border-t border-zinc-800 p-4">
+              <div className="mb-3 grid grid-cols-7 gap-1 sm:grid-cols-[repeat(13,minmax(0,1fr))]">
                 {hypothesisTraces.map((tr) => {
                   const selected = tr.assumedPartnerIdx === selectedHypothesisIdx;
                   return (
@@ -395,7 +358,7 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                       type="button"
                       onClick={() => setSelectedHypothesisIdx(tr.assumedPartnerIdx)}
                       className={`rounded border py-1 font-mono text-xs font-bold transition ${
-                        selected ? 'ring-1 ring-bletchley-brass-bright ' : ''
+                        selected ? 'ring-1 ring-amber-400 ' : ''
                       }${
                         tr.consistent
                           ? 'border-emerald-500/60 bg-emerald-950/50 text-emerald-300'
@@ -452,38 +415,30 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-3 rounded border border-zinc-800 bg-[#08090c] p-4 font-mono text-xs lg:col-span-4">
+                  <div className="space-y-3 rounded border border-zinc-800 bg-[#08090c] p-3.5 font-mono text-xs lg:col-span-4">
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                       <span className="font-bold text-zinc-100">
-                        {isIt ? 'Ipotesi' : 'Hypothesis'}: {menu.testRegister}-
-                        {activeHypothesis.assumedPartner}
+                        Hypothesis {menu.testRegister}-{activeHypothesis.assumedPartner}
                       </span>
                       <span
                         className={
                           activeHypothesis.consistent
-                            ? 'text-emerald-400'
-                            : 'text-rose-400'
+                            ? 'font-bold text-emerald-400'
+                            : 'font-bold text-rose-400'
                         }
                       >
-                        {activeHypothesis.consistent
-                          ? isIt
-                            ? 'Coerente'
-                            : 'Consistent'
-                          : isIt
-                            ? 'Contraddizione'
-                            : 'Contradiction'}
+                        {activeHypothesis.consistent ? 'Consistent' : 'Contradiction'}
                       </span>
                     </div>
 
                     <div className="text-zinc-400">
-                      {isIt ? 'Contatti attivati:' : 'Activated contacts:'}{' '}
-                      {activeHypothesis.propagatedSteps}
+                      Energized contacts: <strong className="text-zinc-200">{activeHypothesis.propagatedSteps}</strong>
                     </div>
 
                     {!activeHypothesis.consistent ? (
                       <div>
-                        <span className="text-[11px] uppercase text-rose-400">
-                          {isIt ? 'Registri in conflitto:' : 'Conflicting registers:'}
+                        <span className="text-[11px] text-rose-400">
+                          Conflicting registers ({activeHypothesis.contradictedNodes.length}):
                         </span>
                         <div className="mt-1 flex flex-wrap gap-1 text-xs text-rose-200">
                           {activeHypothesis.contradictedNodes.map((n) => (
@@ -498,23 +453,21 @@ export const BombeConsolePanel: React.FC<BombeConsolePanelProps> = ({
                       </div>
                     ) : (
                       <div>
-                        <span className="text-[11px] uppercase text-emerald-400">
-                          {isIt ? 'Cavi individuati:' : 'Identified cables:'}
+                        <span className="text-[11px] text-emerald-400">
+                          Deduced stecker pairs:
                         </span>
                         <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
                           {activeHypothesis.deducedPairs.length > 0 ? (
                             activeHypothesis.deducedPairs.map(([a, b]) => (
                               <span
                                 key={`${a}${b}`}
-                                className="rounded border border-emerald-500/40 bg-emerald-950/40 px-2 py-0.5 text-emerald-200"
+                                className="rounded border border-emerald-500/40 bg-emerald-950/40 px-2 py-0.5 font-bold text-emerald-200"
                               >
                                 {a}{b}
                               </span>
                             ))
                           ) : (
-                            <span className="text-zinc-500">
-                              {isIt ? 'Nessun cavo esterno' : 'No external cables'}
-                            </span>
+                            <span className="text-zinc-500">None</span>
                           )}
                         </div>
                       </div>
