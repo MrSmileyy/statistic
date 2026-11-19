@@ -344,8 +344,8 @@ export const EnigmaCabinet: React.FC<EnigmaCabinetProps> = ({
                   <span className="inline-flex items-center font-mono text-[9px] uppercase tracking-widest text-zinc-500">
                     UKW Reflector
                     <InfoTooltip
-                      title="UKW Reflector (Umkehrwalze)"
-                      text="Stationary wiring disc at the left end that bounces the signal back through the rotors. Ensures encryption equals decryption and no letter ever encrypts to itself."
+                      title="What is the UKW Reflector? (Umkehrwalze)"
+                      text={`The Reflector is a stationary, non-rotating disc at the far left end with 13 internal cable pairs (connecting all 26 pins two by two).\n\nWhat it does:\n1. Electrical U-Turn: Current goes Right→Left through the 3 rotors, hits the Reflector, jumps to a DIFFERENT wire, and returns Left→Right through the same rotors.\n2. Same Key Decrypts: Because the path is a symmetric loop, if A encrypts to G, then G at the same settings encrypts back to A (no encrypt/decrypt switch needed!).\n3. B vs C Buttons: Switch between the two real WWII models (UKW-B from 1937 and UKW-C), each with a completely different pair wiring.\n4. Fatal Flaw: Because no pin loops back to itself, a letter can NEVER encrypt into itself—which Bletchley Park used to break Enigma!`}
                       align="left"
                     />
                   </span>
@@ -373,13 +373,48 @@ export const EnigmaCabinet: React.FC<EnigmaCabinetProps> = ({
                 </div>
 
                 {/* Center Tight Bank: 3 Cylindrical Windows & Exposed Notched Steel Wheels */}
-                <div className="flex items-center gap-2.5 rounded-lg border border-zinc-700/80 bg-[#14161b] px-3 py-1.5 shadow-inner sm:gap-4">
+                <div className="flex flex-col items-center gap-1.5 rounded-lg border border-zinc-700/80 bg-[#14161b] px-3 py-1.5 shadow-inner">
+                  {/* Micro-Legend Explaining Rotor & Ring Selectors */}
+                  <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-zinc-800/90 pb-1 font-mono text-[9px] uppercase tracking-wider text-zinc-400">
+                    <span className="inline-flex items-center">
+                      <span className="text-bletchley-brass-bright">Wheel I–V (Notch)</span>
+                      <InfoTooltip
+                        title="Rotor Wheel & Notch — e.g. IV(J), V(Z)"
+                        text={`Roman numeral (I–V) chooses WHICH internal brass rotor disc is loaded into that slot—each has completely different 26-wire scramble wiring.\n\nLetter in ( ) is the Turnover Notch:\n• I(Q) steps left neighbor on Q\n• II(E) on E  • III(V) on V\n• IV(J) on J  • V(Z) on Z\n\nReal Enigma operators used 3 distinct wheels out of 5 (5×4×3 = 60 orders); this lab also allows repeats (e.g. V(Z) twice) so you can test identical wheels.`}
+                      />
+                    </span>
+                    <span className="text-zinc-700">|</span>
+                    <span className="inline-flex items-center">
+                      <span className="text-zinc-300">Ring 01–26</span>
+                      <InfoTooltip
+                        title="Ring Setting (Ringstellung) — 01 to 26"
+                        text={`Number 01–26 (= A–Z) rotates the outer visible letter tyre relative to the rotor's internal wire core:\n• Internal offset = (Window − Ring) mod 26\n• Example: Window B at Ring 02 aligns the internal wires identically to Window A at Ring 01, while the turnover notch stays at the letter shown in ( ).\n\nDaily Enigma codebooks fixed Ringstellung to scramble wire positions beneath the window letters.`}
+                      />
+                    </span>
+                    {new Set(config.rotors).size < 3 && (
+                      <>
+                        <span className="text-zinc-700">|</span>
+                        <span className="inline-flex items-center text-amber-300">
+                          Duplicate Wheel
+                          <InfoTooltip
+                            title="Repeated Rotor Wheel Detected"
+                            text={`You currently have ${config.rotors.join(' - ')} loaded. In wartime practice each wheel I–V existed only once per machine box, so two slots never shared the same rotor. Here in the simulator both matching slots simply use that rotor's identical wiring & notch.`}
+                          />
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2.5 sm:gap-4">
                   {([0, 1, 2] as const).map((slot) => {
                     const rotorId = config.rotors[slot];
                     const spec = ROTORS[rotorId];
                     const pos = config.rotorPositions[slot];
                     const ring = config.ringSettings[slot];
                     const atNotch = pos === spec.notchIndex;
+                    const ringStr = String(ring + 1).padStart(2, '0');
+                    const rightSpec = ROTORS[config.rotors[2]];
+                    const midSpec = ROTORS[config.rotors[1]];
 
                     return (
                       <div key={slot} className="flex items-center gap-1.5">
@@ -391,24 +426,24 @@ export const EnigmaCabinet: React.FC<EnigmaCabinetProps> = ({
                               <InfoTooltip
                                 title={
                                   slot === 0
-                                    ? 'Left Rotor (Slow)'
+                                    ? `Left Slot (SX · Slow) — Wheel ${rotorId}(${spec.notchChar}) Ring ${ringStr}`
                                     : slot === 1
-                                      ? 'Middle Rotor (Double-Step)'
-                                      : 'Right Rotor (Fast)'
+                                      ? `Middle Slot (CX · Double-Step) — Wheel ${rotorId}(${spec.notchChar}) Ring ${ringStr}`
+                                      : `Right Slot (DX · Fast) — Wheel ${rotorId}(${spec.notchChar}) Ring ${ringStr}`
                                 }
                                 text={
                                   slot === 0
-                                    ? 'Leftmost slow wheel: selects rotor I–V, ring setting (01–26), and window letter. Advances when the middle wheel hits its notch.'
+                                    ? `Loaded: Rotor ${rotorId} (wiring from ${spec.year}, notch ${spec.notchChar}), Ring ${ringStr} (${indexToChar(ring)}), Window ${indexToChar(pos)}.\n\nAdvances +1 only when middle wheel CX (${midSpec.id}) triggers on its own notch (${midSpec.notchChar}).`
                                     : slot === 1
-                                      ? 'Middle wheel: steps when the right rotor hits its notch, and double-steps together with the left rotor when on its own notch.'
-                                      : 'Rightmost fast wheel: advances +1 on every single keypress before the electrical circuit closes.'
+                                      ? `Loaded: Rotor ${rotorId} (wiring from ${spec.year}, notch ${spec.notchChar}), Ring ${ringStr} (${indexToChar(ring)}), Window ${indexToChar(pos)}.\n\nSteps +1 when right wheel DX (${rightSpec.id}) leaves ${rightSpec.notchChar}, and double-steps together with SX when CX sits on ${spec.notchChar}.`
+                                      : `Loaded: Rotor ${rotorId} (wiring from ${spec.year}, notch ${spec.notchChar}), Ring ${ringStr} (${indexToChar(ring)}), Window ${indexToChar(pos)}.\n\nAdvances +1 on EVERY keypress before current flows; pushes CX when stepping past ${spec.notchChar}.`
                                 }
                               />
                             </span>
                             <select
                               value={rotorId}
                               aria-label={`Rotor ${slot + 1}`}
-                              title={isIt ? 'Tipo di rotore (I–V)' : 'Rotor wheel (I–V)'}
+                              title={isIt ? 'Tipo di rotore I–V e tacca (Q/E/V/J/Z)' : 'Rotor wheel (I–V) and turnover notch'}
                               onChange={(e) => handleRotorSelect(slot, e.target.value as RotorId)}
                               className="rounded border border-zinc-700 bg-black px-1 py-0.5 font-mono text-[10px] font-bold text-bletchley-brass-bright focus:outline-none"
                             >
@@ -421,7 +456,7 @@ export const EnigmaCabinet: React.FC<EnigmaCabinetProps> = ({
                             <select
                               value={ring}
                               aria-label={`Ring ${slot + 1}`}
-                              title={isIt ? 'Anello interno (Ringstellung)' : 'Ring setting'}
+                              title={isIt ? 'Impostazione anello Ringstellung (01–26 = A–Z)' : 'Ring setting (Ringstellung 01–26 = A–Z)'}
                               onChange={(e) => handleRingChange(slot, Number(e.target.value))}
                               className="rounded border border-zinc-800 bg-black px-1 py-0.5 font-mono text-[10px] text-zinc-400 focus:outline-none"
                             >
@@ -481,6 +516,7 @@ export const EnigmaCabinet: React.FC<EnigmaCabinetProps> = ({
                       </div>
                     );
                   })}
+                  </div>
                 </div>
 
                 {/* Right Block: Compact Inline Perforated Paper Tape */}

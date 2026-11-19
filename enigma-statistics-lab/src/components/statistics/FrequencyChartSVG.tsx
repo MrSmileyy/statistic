@@ -29,35 +29,51 @@ export const FrequencyChartSVG: React.FC<FrequencyChartSVGProps> = ({
   const hovered = hoveredIdx !== null ? frequencies[hoveredIdx] : null;
   const yUniform = padTop + plotH - ((1 / 26) / maxFreq) * plotH;
 
+  const topObserved = [...frequencies]
+    .filter((f) => f.count > 0)
+    .sort((a, b) => b.observedFreq - a.observedFreq)
+    .slice(0, 3);
+
+  const topExpected = [...frequencies]
+    .sort((a, b) => b.expectedFreq - a.expectedFreq)
+    .slice(0, 3);
+
   return (
     <section className="rounded-lg border border-zinc-800 bg-[#0d0e12] p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2.5">
-        <h3 className="flex items-center font-mono text-sm font-bold text-zinc-100">
-          <span>Observed vs. Expected Relative Frequencies (A&ndash;Z)</span>
-          <InfoTooltip
-            title="Letter Frequency Histogram"
-            text="Blue bars show letter percentages in your sample text. Amber bars show normal German or English language frequencies. If your text is encrypted, blue bars hover near the red 3.85% (1/26) line."
-            align="left"
-          />
-        </h3>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2.5">
+        <div>
+          <h3 className="flex items-center font-mono text-sm font-bold text-zinc-100">
+            <span>Letter Frequency Fingerprint (Your Text vs. Normal Language)</span>
+            <InfoTooltip
+              title="How to Read This Bar Chart"
+              text={`• Blue bars = how often each letter appears in YOUR text.\n• Amber bars = how often each letter appears in normal German/English.\n• Red dashed line = 3.85% (flat random noise).\n\nEncrypted text looks flat near the red line; real plaintext rises to match the tall amber bars (like E, N, R, T).`}
+              align="left"
+            />
+          </h3>
+          <p className="mt-0.5 text-xs text-zinc-400">
+            <strong className="text-sky-300">Blue</strong> = your text &middot;{' '}
+            <strong className="text-amber-300">Amber</strong> = normal language &middot;{' '}
+            <strong className="text-rose-400">Red line</strong> = pure random (3.85%). When text is decrypted, blue bars rise to match the tall amber peaks.
+          </p>
+        </div>
 
         <div className="flex flex-wrap items-center gap-4 font-mono text-xs text-zinc-400">
           <span className="inline-flex items-center gap-1.5 text-sky-300">
             <span className="h-2.5 w-2.5 rounded-sm bg-[#38bdf8]" />
-            Observed
+            Your Text
           </span>
           <span className="inline-flex items-center gap-1.5 text-amber-300">
             <span className="h-2.5 w-2.5 rounded-sm bg-[#d4a853]" />
-            Expected (H₁)
+            Normal Language
           </span>
           <span className="inline-flex items-center gap-1.5 text-rose-400">
             <span className="h-0.5 w-3.5 bg-[#ef4444]" />
-            Uniform 1/26 (H₀)
+            Random 3.85%
           </span>
         </div>
       </div>
 
-      <div className="mb-2 flex min-h-[26px] items-center justify-between rounded border border-zinc-800 bg-[#08090c] px-3 py-1 font-mono text-xs text-zinc-300">
+      <div className="mb-2 flex min-h-[28px] flex-wrap items-center justify-between gap-2 rounded border border-zinc-800 bg-[#08090c] px-3 py-1 font-mono text-xs text-zinc-300">
         {hovered ? (
           <div className="flex flex-wrap gap-5">
             <span>
@@ -65,19 +81,38 @@ export const FrequencyChartSVG: React.FC<FrequencyChartSVGProps> = ({
             </span>
             <span>Count: {hovered.count}</span>
             <span className="text-sky-300">
-              Observed: {(hovered.observedFreq * 100).toFixed(2)}%
+              Your text: {(hovered.observedFreq * 100).toFixed(2)}%
             </span>
             <span className="text-amber-300">
-              Expected: {(hovered.expectedFreq * 100).toFixed(2)}%
+              Normal: {(hovered.expectedFreq * 100).toFixed(2)}%
             </span>
             <span className="text-zinc-400">
-              &chi;&sup2; term: {hovered.chiSquaredComponent.toFixed(2)}
+              Gap (&chi;&sup2;): {hovered.chiSquaredComponent.toFixed(2)}
             </span>
           </div>
         ) : (
-          <span className="text-[11px] text-zinc-500">
-            Hover over a letter column to inspect counts and &chi;&sup2; contribution
-          </span>
+          <div className="flex w-full flex-wrap items-center justify-between gap-2 text-[11px]">
+            <span className="text-zinc-400">
+              Top in your text:{' '}
+              {topObserved.length > 0 ? (
+                <strong className="text-sky-300">
+                  {topObserved
+                    .map((f) => `${f.char} (${(f.observedFreq * 100).toFixed(1)}%)`)
+                    .join(', ')}
+                </strong>
+              ) : (
+                '—'
+              )}
+              <span className="mx-2 text-zinc-600">|</span>
+              Normal top:{' '}
+              <strong className="text-amber-300">
+                {topExpected
+                  .map((f) => `${f.char} (${(f.expectedFreq * 100).toFixed(1)}%)`)
+                  .join(', ')}
+              </strong>
+            </span>
+            <span className="text-zinc-500">Hover any letter bar for details</span>
+          </div>
         )}
       </div>
 

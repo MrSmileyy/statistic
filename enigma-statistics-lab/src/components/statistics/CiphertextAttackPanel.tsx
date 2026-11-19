@@ -64,17 +64,17 @@ export const CiphertextAttackPanel: React.FC<CiphertextAttackPanelProps> = ({
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-2.5">
         <div>
           <h3 className="flex items-center font-mono text-sm font-bold text-zinc-100">
-            <span>Exhaustive Rotor Position Sweep (26&sup3; = 17,576 states)</span>
+            <span>Automatic Rotor Key Finder (Tests All 17,576 Windows)</span>
             <InfoTooltip
-              title="Ciphertext-Only Rotor Sweep"
-              text="Tests every possible 3-letter window setting (AAA through ZZZ) in a background Web Worker, decrypts your ciphertext, and scores each output statistically to surface the real rotor key."
+              title="How Ciphertext-Only Key Recovery Works"
+              text={`You do NOT need to guess any word (no crib).\n1. A background worker tries decrypting your ciphertext at every 3-letter rotor window from AAA to ZZZ (26³ = 17,576 tries).\n2. Wrong keys produce flat gibberish (~3.85% IoC).\n3. The single true key suddenly restores natural language repetitions (~6.7%–7.6% IoC) and shoots to the #1 spot!`}
               align="left"
             />
           </h3>
-          <p className="mt-0.5 text-xs text-zinc-500">
-            Decrypts the text across every window AAA&ndash;ZZZ using active rotors{' '}
-            <span className="font-mono text-zinc-300">{enigmaConfig.rotors.join('-')}</span> and reflector{' '}
-            <span className="font-mono text-zinc-300">{enigmaConfig.reflector}</span>, ranking keys by natural-language statistics.
+          <p className="mt-0.5 text-xs text-zinc-400">
+            Finds the hidden starting window (<span className="font-mono text-zinc-200">AAA&ndash;ZZZ</span>) for active rotors{' '}
+            <span className="font-mono text-zinc-200">{enigmaConfig.rotors.join('-')}</span> /{' '}
+            <span className="font-mono text-zinc-200">{enigmaConfig.reflector}</span> without needing a crib. Look for the tall green bar standing far above the rest.
           </p>
         </div>
 
@@ -125,18 +125,36 @@ export const CiphertextAttackPanel: React.FC<CiphertextAttackPanelProps> = ({
         </div>
       </div>
 
+      {/* 3-Step Plain-English Guide */}
+      <div className="mb-3 grid grid-cols-1 gap-2 rounded border border-zinc-800 bg-[#08090c] p-2.5 text-[11px] text-zinc-400 md:grid-cols-3">
+        <div>
+          <strong className="font-mono text-amber-300">Step 1:</strong> Make sure your sample text above is{' '}
+          <strong className="text-zinc-200">encrypted ciphertext</strong> (not already plaintext).
+        </div>
+        <div>
+          <strong className="font-mono text-sky-300">Step 2:</strong> Click{' '}
+          <strong className="text-zinc-200">Run 17,576-Position Sweep</strong> to test every rotor start key from <span className="font-mono">AAA</span> to <span className="font-mono">ZZZ</span>.
+        </div>
+        <div>
+          <strong className="font-mono text-emerald-300">Step 3:</strong> Inspect the <strong className="text-emerald-300">#1 green bar</strong> and click{' '}
+          <strong className="text-zinc-200">Apply Key to Enigma</strong> to read the message!
+        </div>
+      </div>
+
       {enigmaConfig.plugboard.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded border border-amber-500/30 bg-[#08090c] px-3 py-2 font-mono text-xs text-zinc-300">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded border border-amber-500/30 bg-[#08090c] px-3 py-2 text-xs text-zinc-300">
           <span>
-            Plugboard has {enigmaConfig.plugboard.length} active pairs. Direct ciphertext-only sweeps assume zero or already recovered stecker cables.
+            <strong className="font-mono text-amber-300">Plugboard note:</strong>{' '}
+            {enigmaConfig.plugboard.length} cables are currently active on Enigma. Ranking by{' '}
+            <strong className="font-mono text-zinc-100">IoC</strong> still spots the rotor core even through cables, or click the button to test a clean 0-plug English intercept.
           </span>
           {onLoadUnsteckeredDemo && (
             <button
               type="button"
               onClick={onLoadUnsteckeredDemo}
-              className="rounded border border-zinc-700 bg-zinc-900 px-2.5 py-1 font-mono text-[11px] text-amber-300 hover:border-amber-500/50"
+              className="rounded border border-amber-500/40 bg-amber-950/30 px-2.5 py-1 font-mono text-[11px] font-semibold text-amber-300 hover:bg-amber-950/50"
             >
-              Load unsteckered demo
+              Load 0-Plug Demo
             </button>
           )}
         </div>

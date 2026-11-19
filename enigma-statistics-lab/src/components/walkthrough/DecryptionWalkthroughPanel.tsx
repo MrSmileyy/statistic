@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ALPHABET,
   formatPositionLabel,
   HISTORICAL_PRESETS,
   indexToChar,
   normalizeAsciiLetters,
+  ROTORS,
 } from '../../core/constants';
 import {
   buildBombeMenu,
@@ -120,10 +121,13 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [showAllSteps, setShowAllSteps] = useState<boolean>(false);
   const [cribOffset, setCribOffset] = useState<number>(activePreset.expectedOffset);
+  const [isAutoSliding, setIsAutoSliding] = useState<boolean>(false);
   const [testRegisterIdx, setTestRegisterIdx] = useState<number | undefined>(undefined);
   const [falseWindow, setFalseWindow] = useState<[number, number, number]>([0, 0, 0]);
+  const tapeScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    setIsAutoSliding(false);
     setCribOffset(activePreset.expectedOffset);
     setTestRegisterIdx(undefined);
     setFalseWindow(
@@ -167,8 +171,32 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
     [alignments],
   );
 
-  const clampedOffset = Math.max(0, Math.min(cribOffset, Math.max(0, alignments.length - 1)));
+  const maxOffset = Math.max(0, alignments.length - 1);
+  const clampedOffset = Math.max(0, Math.min(cribOffset, maxOffset));
   const activeAlignment = alignments[clampedOffset];
+
+  useEffect(() => {
+    if (!isAutoSliding) return;
+    const timer = window.setInterval(() => {
+      setCribOffset((prev) => {
+        if (prev >= maxOffset) {
+          setIsAutoSliding(false);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 260);
+    return () => window.clearInterval(timer);
+  }, [isAutoSliding, maxOffset]);
+
+  useEffect(() => {
+    const el = tapeScrollRef.current;
+    if (!el) return;
+    // Each column is 28px wide (w-7) + 4px gap = 32px; sticky label rail ~52px.
+    const cribCenterPx = 52 + (clampedOffset + activePreset.crib.length / 2) * 32;
+    const targetScroll = Math.max(0, cribCenterPx - el.clientWidth / 2);
+    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+  }, [clampedOffset, activePreset.crib.length, currentStep, showAllSteps]);
 
   // Step 3: Build Turing Menu at valid offset (fall back to true offset if user parked on invalid)
   const menuOffset = activeAlignment?.isValid ? clampedOffset : activePreset.expectedOffset;
@@ -546,105 +574,211 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
             {meta.cribRationale}
           </p>
 
-          {/* Interactive Offset Controls */}
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded border border-zinc-800 bg-[#08090c] p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {firstCollisionAlignment && (
+          {/* Interactive Sliding Crib Controls (Matches Bombe Crib Scanner) */}
+          <div className="mt-3 rounded border border-zinc-800 bg-[#08090c] p-3">
+            {/* Quick Jump & Auto-Slide Row */}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setCribOffset(firstCollisionAlignment.offset)}
-                  className={`rounded border px-2.5 py-1 font-mono text-xs transition ${
-                    clampedOffset === firstCollisionAlignment.offset
-                      ? 'border-rose-500 bg-rose-950/40 font-semibold text-rose-300'
-                      : 'border-rose-800/60 bg-rose-950/15 text-rose-300 hover:border-rose-500'
+                  onClick={() => {
+                    if (!isAutoSliding && clampedOffset >= maxOffset) {
+                      setCribOffset(0);
+                    }
+                    setIsAutoSliding((v) => !v);
+                  }}
+                  className={`rounded border px-2.5 py-1 font-mono text-xs font-semibold transition ${
+                    isAutoSliding
+                      ? 'border-amber-400 bg-amber-500/25 text-amber-200'
+                      : 'border-sky-500/50 bg-sky-950/25 text-sky-300 hover:border-sky-400'
                   }`}
                 >
-                  Inspect Invalid Collision (+{firstCollisionAlignment.offset})
+                  {isAutoSliding ? '⏸ Pause Auto-Slide' : '▶ Auto-Slide Crib'}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setCribOffset(activePreset.expectedOffset)}
-                className={`rounded border px-2.5 py-1 font-mono text-xs transition ${
-                  clampedOffset === activePreset.expectedOffset
-                    ? 'border-emerald-500 bg-emerald-950/40 font-semibold text-emerald-300'
-                    : 'border-emerald-800/60 bg-emerald-950/15 text-emerald-300 hover:border-emerald-500'
-                }`}
-              >
-                Inspect True Valid Alignment (+{activePreset.expectedOffset})
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCribOffset((o) => Math.max(0, o - 1))}
-                className="rounded border border-zinc-700 bg-[#0d0e12] px-2 py-1 font-mono text-xs text-zinc-300 hover:border-zinc-500"
-              >
-                ← Slide
-              </button>
-              <span className="font-mono text-xs font-bold text-zinc-200">
-                Offset +{clampedOffset} (Pos {clampedOffset + 1}..{clampedOffset + activePreset.crib.length})
-              </span>
-              <button
-                type="button"
-                onClick={() => setCribOffset((o) => Math.min(alignments.length - 1, o + 1))}
-                className="rounded border border-zinc-700 bg-[#0d0e12] px-2 py-1 font-mono text-xs text-zinc-300 hover:border-zinc-500"
-              >
-                Slide →
-              </button>
-            </div>
-          </div>
-
-          {/* Status Banner */}
-          {activeAlignment && (
-            <div
-              className={`mt-3 rounded border px-3 py-2 font-mono text-xs ${
-                activeAlignment.isValid
-                  ? 'border-emerald-500/40 bg-emerald-950/20 text-emerald-300'
-                  : 'border-rose-500/50 bg-rose-950/25 text-rose-300'
-              }`}
-            >
-              {activeAlignment.isValid
-                ? `✓ VALID ALIGNMENT at offset +${clampedOffset} (0 reflector self-encryptions). Menu & loops unlocked!`
-                : `✕ IMPOSSIBLE ALIGNMENT at offset +${clampedOffset}: ${activeAlignment.collisionIndices.length} reflector collision(s) at position(s) ${activeAlignment.collisionIndices
-                    .map((idx) => idx + 1)
-                    .join(', ')}. Ruled out immediately!`}
-            </div>
-          )}
-
-          {/* 4-Row Alignment Window */}
-          <div className="mt-3 overflow-x-auto rounded border border-zinc-800 bg-[#08090c] p-3">
-            <div className="inline-flex min-w-full gap-1">
-              <div className="mr-2 flex flex-col justify-between py-1 font-mono text-[10px] text-zinc-500">
-                <span>Pos</span>
-                <span>Cipher</span>
-                <span>Crib</span>
-                <span>Rule</span>
-              </div>
-              {Array.from({ length: activePreset.crib.length }).map((_, idx) => {
-                const msgPos = clampedOffset + idx;
-                const cChar = ciphertext[msgPos] ?? '-';
-                const pChar = activePreset.crib[idx];
-                const crash = cChar === pChar;
-                return (
-                  <div
-                    key={idx}
-                    className={`flex w-8 shrink-0 flex-col items-center rounded border py-1 font-mono text-xs ${
-                      crash
-                        ? 'border-rose-500/70 bg-rose-950/40 text-rose-200'
-                        : 'border-emerald-700/40 bg-emerald-950/15 text-zinc-100'
+                {firstCollisionAlignment && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAutoSliding(false);
+                      setCribOffset(firstCollisionAlignment.offset);
+                    }}
+                    className={`rounded border px-2.5 py-1 font-mono text-xs transition ${
+                      clampedOffset === firstCollisionAlignment.offset
+                        ? 'border-rose-500 bg-rose-950/40 font-semibold text-rose-300'
+                        : 'border-rose-800/60 bg-rose-950/15 text-rose-300 hover:border-rose-500'
                     }`}
                   >
-                    <span className="text-[9px] text-zinc-500">{msgPos + 1}</span>
-                    <span className="font-bold text-sky-300">{cChar}</span>
-                    <span className="font-bold text-amber-300">{pChar}</span>
-                    <span className={`text-[10px] font-bold ${crash ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {crash ? '✕' : '✓'}
-                    </span>
-                  </div>
-                );
-              })}
+                    Jump to Collision (+{firstCollisionAlignment.offset})
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAutoSliding(false);
+                    setCribOffset(activePreset.expectedOffset);
+                  }}
+                  className={`rounded border px-2.5 py-1 font-mono text-xs transition ${
+                    clampedOffset === activePreset.expectedOffset
+                      ? 'border-emerald-500 bg-emerald-950/40 font-semibold text-emerald-300'
+                      : 'border-emerald-800/60 bg-emerald-950/15 text-emerald-300 hover:border-emerald-500'
+                  }`}
+                >
+                  Jump to True Alignment (+{activePreset.expectedOffset})
+                </button>
+              </div>
+              <span className="font-mono text-[11px] text-zinc-500">
+                Upper tape: Fixed Ciphertext ({ciphertext.length} chars) · Lower tape: Sliding Crib ({activePreset.crib.length} chars)
+              </span>
+            </div>
+
+            {/* Slider Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                disabled={clampedOffset <= 0 || alignments.length === 0}
+                onClick={() => {
+                  setIsAutoSliding(false);
+                  setCribOffset((o) => Math.max(0, o - 1));
+                }}
+                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1 font-mono text-xs text-zinc-200 transition hover:border-zinc-500 disabled:opacity-40"
+              >
+                &larr; Shift Crib
+              </button>
+
+              <div className="flex min-w-[200px] flex-1 items-center gap-3">
+                <span className="whitespace-nowrap font-mono text-xs font-semibold text-zinc-300">
+                  Pos {clampedOffset + 1} (offset +{clampedOffset})
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={maxOffset}
+                  value={clampedOffset}
+                  disabled={maxOffset === 0}
+                  onChange={(e) => {
+                    setIsAutoSliding(false);
+                    setCribOffset(Number(e.target.value));
+                  }}
+                  aria-label="Slide crib tape under ciphertext"
+                  className="h-1.5 w-full cursor-pointer accent-amber-500 disabled:cursor-not-allowed disabled:opacity-40"
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={clampedOffset >= maxOffset || alignments.length === 0}
+                onClick={() => {
+                  setIsAutoSliding(false);
+                  setCribOffset((o) => Math.min(maxOffset, o + 1));
+                }}
+                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1 font-mono text-xs text-zinc-200 transition hover:border-zinc-500 disabled:opacity-40"
+              >
+                Shift Crib &rarr;
+              </button>
+            </div>
+
+            {/* Status Banner */}
+            {activeAlignment && (
+              <div
+                className={`mt-2.5 rounded border px-3 py-2 font-mono text-xs ${
+                  activeAlignment.isValid
+                    ? 'border-emerald-500/40 bg-emerald-950/30 text-emerald-300'
+                    : 'border-rose-500/50 bg-rose-950/35 text-rose-300'
+                }`}
+              >
+                {activeAlignment.isValid ? (
+                  <span>
+                    <strong>✓ Valid Alignment (0 collisions)</strong> &mdash; Crib slides cleanly at offset +{clampedOffset} (positions {clampedOffset + 1}&ndash;{clampedOffset + activePreset.crib.length}). Turing Menu &amp; loops unlocked!
+                  </span>
+                ) : (
+                  <span>
+                    <strong>✕ Collision Detected ({activeAlignment.collisionIndices.length})</strong> &mdash; At offset +{clampedOffset}, letter(s) collide at crib index {activeAlignment.collisionIndices.map((idx) => idx + 1).join(', ')}. Because E(x) &ne; x, this offset is mechanically impossible.
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Full Two-Ribbon Sliding Grid: Fixed Upper Ciphertext Tape + Sliding Lower Crib Tape */}
+            <div
+              ref={tapeScrollRef}
+              className="mt-3 overflow-x-auto rounded border border-zinc-800 bg-[#0d0e12] p-2.5"
+            >
+              <div className="inline-flex items-stretch gap-1 font-mono text-xs">
+                <div className="sticky left-0 z-10 flex shrink-0 flex-col items-end justify-between bg-[#0d0e12] pr-2 text-[10px] font-bold text-zinc-500">
+                  <span className="flex h-4 items-center">Pos</span>
+                  <span className="flex h-6 items-center text-sky-300">Cipher</span>
+                  <span className="flex h-6 items-center text-amber-300">Crib</span>
+                  <span className="flex h-5 items-center">Check</span>
+                </div>
+
+                {ciphertext.split('').map((cChar, i) => {
+                  const inCrib =
+                    activeAlignment !== null &&
+                    i >= clampedOffset &&
+                    i < clampedOffset + activePreset.crib.length;
+                  const pChar = inCrib ? activePreset.crib[i - clampedOffset] : '';
+                  const collided = inCrib && cChar === pChar;
+                  const validWindow = inCrib && activeAlignment?.isValid;
+
+                  return (
+                    <div
+                      key={i}
+                      className={`flex w-7 shrink-0 flex-col items-center rounded border py-0.5 transition-colors ${
+                        collided
+                          ? 'border-rose-500/80 bg-rose-950/55 text-rose-200'
+                          : validWindow
+                            ? 'border-emerald-500/55 bg-emerald-950/35 text-emerald-200'
+                            : inCrib
+                              ? 'border-amber-500/40 bg-zinc-900 text-zinc-200'
+                              : 'border-zinc-800/80 bg-[#08090c] text-zinc-500'
+                      }`}
+                    >
+                      <span className="flex h-4 items-center text-[9px] text-zinc-500">
+                        {i + 1}
+                      </span>
+                      <span
+                        className={`flex h-6 items-center font-bold ${
+                          collided
+                            ? 'text-rose-300'
+                            : inCrib
+                              ? 'text-sky-300'
+                              : 'text-zinc-400'
+                        }`}
+                      >
+                        {cChar}
+                      </span>
+                      <span
+                        className={`flex h-6 w-full items-center justify-center font-bold ${
+                          inCrib
+                            ? collided
+                              ? 'border-t border-rose-500/50 bg-rose-900/40 text-rose-200'
+                              : validWindow
+                                ? 'border-t border-emerald-500/40 bg-emerald-900/30 text-emerald-300'
+                                : 'border-t border-amber-500/30 bg-amber-950/30 text-amber-300'
+                            : 'border-t border-dashed border-zinc-800/70 text-transparent'
+                        }`}
+                      >
+                        {inCrib ? pChar : '·'}
+                      </span>
+                      <span className="flex h-5 items-center text-[10px] font-bold">
+                        {collided ? (
+                          <span className="text-rose-400" title="Self-encryption collision (E(x) ≠ x violated)">
+                            &#10005;
+                          </span>
+                        ) : validWindow ? (
+                          <span className="text-emerald-400" title="Valid non-colliding letter pair">
+                            &#10003;
+                          </span>
+                        ) : inCrib ? (
+                          <span className="text-zinc-500">&middot;</span>
+                        ) : (
+                          <span className="text-transparent">&middot;</span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -661,7 +795,10 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
                   <button
                     key={a.offset}
                     type="button"
-                    onClick={() => setCribOffset(a.offset)}
+                    onClick={() => {
+                      setIsAutoSliding(false);
+                      setCribOffset(a.offset);
+                    }}
                     className={`rounded border px-1.5 py-0.5 font-mono text-[10px] transition ${
                       isSelected
                         ? a.isValid
@@ -1076,24 +1213,54 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
               </div>
               <dl className="mt-2.5 space-y-1.5 font-mono text-xs">
                 <div className="flex justify-between gap-2 border-b border-zinc-800/70 pb-1">
-                  <dt className="text-zinc-500">Walzenlage (Rotor Order)</dt>
+                  <dt className="flex items-center text-zinc-500">
+                    Walzenlage (Rotor Order)
+                    <InfoTooltip
+                      title="Rotor Selectors: I(Q)–V(Z)"
+                      text={`Selects which 3 physical brass rotors sit in slots SX (Left), CX (Middle), and DX (Right). Each Roman numeral has unique internal wiring, and the letter in ( ) shows its turnover notch (e.g. I(Q), IV(J), V(Z)) that steps the wheel to its left.`}
+                      align="left"
+                    />
+                  </dt>
                   <dd className="font-bold text-zinc-100">
-                    {activePreset.config.rotors.join(' - ')}
+                    {activePreset.config.rotors
+                      .map((r) => `${r}(${ROTORS[r].notchChar})`)
+                      .join(' - ')}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2 border-b border-zinc-800/70 pb-1">
-                  <dt className="text-zinc-500">Umkehrwalze (Reflector)</dt>
+                  <dt className="flex items-center text-zinc-500">
+                    Umkehrwalze (Reflector)
+                    <InfoTooltip
+                      title="What is the Reflector? (Selector B / C)"
+                      text={`A fixed, non-rotating disc at the far left end with 13 internal cable pairs.\n• Bounces current onto a DIFFERENT wire so it returns through the 3 rotors (making encryption and decryption identical).\n• Switching B ↔ C changes which of the 2 historical German reflector discs (UKW-B vs UKW-C) is fitted.\n• Because no wire connects back to itself, a letter can NEVER encrypt to itself (E(x) ≠ x)—which is how Step 2 rejects false crib offsets!`}
+                      align="left"
+                    />
+                  </dt>
                   <dd className="font-bold text-zinc-100">{activePreset.config.reflector}</dd>
                 </div>
                 <div className="flex justify-between gap-2 border-b border-zinc-800/70 pb-1">
-                  <dt className="text-zinc-500">Ringstellung (Ring Setting)</dt>
+                  <dt className="flex items-center text-zinc-500">
+                    Ringstellung (Ring Setting)
+                    <InfoTooltip
+                      title="Numeric Selector Next to Each Rotor: 01–26"
+                      text={`Number 01–26 (= A–Z) rotates the outer visible letter tyre relative to the inner wired core: shift = (Window − Ring) mod 26.\nChanging 01 → 02 moves the internal wiring contacts beneath the same visible window letter while keeping the turnover notch at (Q/E/V/J/Z).`}
+                      align="left"
+                    />
+                  </dt>
                   <dd className="font-bold text-zinc-100">
                     {formatRingNums(activePreset.config.ringSettings)} (
                     {formatPositionLabel(activePreset.config.ringSettings)})
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2 border-b border-zinc-800/70 pb-1">
-                  <dt className="text-zinc-500">Steckerbrett (Plugboard)</dt>
+                  <dt className="flex items-center text-zinc-500">
+                    Steckerbrett (Plugboard)
+                    <InfoTooltip
+                      title="Front Patch Cables"
+                      text="Pairs of letters swapped both entering and leaving the rotors on the front panel cables."
+                      align="left"
+                    />
+                  </dt>
                   <dd className="font-bold text-amber-300">
                     {formatPlugPairs(activePreset.config.plugboard)}
                   </dd>
@@ -1101,7 +1268,14 @@ export const DecryptionWalkthroughPanel: React.FC<DecryptionWalkthroughPanelProp
               </dl>
 
               <div className="mt-3 flex items-center justify-between rounded border border-rose-900/40 bg-rose-950/15 px-3 py-2 font-mono text-xs">
-                <span className="text-rose-300">Message Key (Grundstellung)</span>
+                <span className="flex items-center text-rose-300">
+                  Message Key (Grundstellung)
+                  <InfoTooltip
+                    title="Starting Window Letters"
+                    text="The 3 visible letters set via the notched thumbwheels before typing the first character of the message (26³ = 17,576 start states)."
+                    align="left"
+                  />
+                </span>
                 <span className="text-sm font-bold tracking-widest text-amber-300">
                   {formatPositionLabel(activePreset.config.rotorPositions)}
                 </span>

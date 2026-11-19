@@ -5,6 +5,7 @@ import {
   formatPositionLabel,
   HISTORICAL_PRESETS,
   indexToChar,
+  ROTOR_IDS,
   ROTORS,
 } from '../../core/constants';
 import { EnigmaM3, stepRotorPositions } from '../../core/enigma';
@@ -173,7 +174,7 @@ export const ExamTheoryPanel: React.FC<ExamTheoryPanelProps> = () => {
       id: 3,
       short: '3. Reflector (U)',
       title: 'Step 3 — Reflector Turnaround (Umkehrwalze U)',
-      tip: 'Fixed mirror disc swapping 13 pairs of pins—sends current back on a different wire so no letter can ever encrypt to itself.',
+      tip: `Fixed disc at the left end wired into 13 letter pairs (like A↔Y). It sends current onto a different wire back through the rotors.\n• Why it exists: makes encryption & decryption identical (reciprocal).\n• UKW-B vs UKW-C: two different historical 13-pair wirings.\n• Cryptanalytic flaw: since no pin maps to itself, no letter can ever encrypt to itself!`,
       summary: `${indexToChar(trace.reflectorInIdx)} ⇄ ${indexToChar(trace.reflectorOutIdx)}`,
       accent: 'text-amber-300',
     },
@@ -446,6 +447,113 @@ export const ExamTheoryPanel: React.FC<ExamTheoryPanelProps> = () => {
               </p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Rotor Wheel (I-V) & Ringstellung (01-26) Selector Guide */}
+      <section className="rounded-lg border border-zinc-800 bg-[#0d0e12] p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
+          <h3 className="flex items-center font-mono text-sm font-bold text-zinc-100">
+            <span>Rotor Wheel &amp; Ring Selectors — Reading Controls like &ldquo;IV(J) 01&rdquo; &amp; &ldquo;V(Z) 01&rdquo;</span>
+            <InfoTooltip
+              title="Machine Rotor Controls Explained"
+              text={`Above each window (SX left, CX middle, DX right) on Enigma M3 sit two dropdowns side by side:\n1. Wheel + Notch — e.g. IV(J) or V(Z)\n2. Ring Setting (Ringstellung) — e.g. 01 through 26.`}
+              align="left"
+            />
+          </h3>
+          <span className="rounded border border-zinc-800 bg-[#08090c] px-2.5 py-0.5 font-mono text-xs text-sky-300">
+            Format: Wheel(Notch) + Ring 01–26
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          {/* Card 1: Rotor Wheel + Notch */}
+          <div className="rounded border border-zinc-800 bg-[#08090c] p-3.5 text-xs leading-relaxed">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5 font-mono font-bold text-amber-300">
+              <span>1. Wheel Selector: I(Q) &ndash; V(Z)</span>
+              <InfoTooltip
+                title="Rotor Wheel (Walzenlage) & Notch"
+                text={`• The Roman numeral (I, II, III, IV, V) selects which internal 26-wire scrambler wheel sits in that slot—swapping I for IV or V changes the entire substitution table.\n• The letter in parentheses (Q, E, V, J, Z) is the physical Turnover Notch: when that letter appears in the window, pressing the next key advances the rotor immediately to its left by +1 step.`}
+                align="left"
+              />
+            </div>
+            <p className="mt-2 text-zinc-400">
+              The Roman numeral (<span className="font-mono text-zinc-200">I&ndash;V</span>) inserts one of the 5 historical cross-wired brass wheels into slot <span className="font-mono text-zinc-200">SX</span>, <span className="font-mono text-zinc-200">CX</span>, or <span className="font-mono text-zinc-200">DX</span>.
+            </p>
+            <p className="mt-1.5 text-zinc-400">
+              The letter in parentheses marks its <strong className="text-zinc-200">Turnover Notch</strong>: e.g. <span className="font-mono text-amber-300">IV(J)</span> pushes its left neighbor when stepping past <span className="font-mono text-zinc-200">J</span>, and <span className="font-mono text-amber-300">V(Z)</span> pushes its left neighbor when stepping past <span className="font-mono text-zinc-200">Z</span>.
+            </p>
+          </div>
+
+          {/* Card 2: Ring Setting 01-26 */}
+          <div className="rounded border border-zinc-800 bg-[#08090c] p-3.5 text-xs leading-relaxed">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5 font-mono font-bold text-sky-300">
+              <span>2. Ring Selector: 01 &ndash; 26</span>
+              <InfoTooltip
+                title="Ring Setting (Ringstellung 01–26 = A–Z)"
+                text={`Numbers 01..26 rotate the visible alphabet tyre (A..Z) relative to the inner wired core:\n• Wiring offset Δ = (Window − Ring) mod 26\n• At Ring 01 (A, offset 0), Window A connects wire 0 straight through.\n• Changing Ring 01 → 02 shifts the internal wiring by −1 without changing the visible window letter or the notch letter in ( ).`}
+              />
+            </div>
+            <p className="mt-2 text-zinc-400">
+              Sets the <strong className="text-zinc-200">Ringstellung</strong> (<span className="font-mono text-zinc-200">01 = A</span> &hellip; <span className="font-mono text-zinc-200">26 = Z</span>): it turns the outer letter ring relative to the internal wiring core inside the rotor wheel.
+            </p>
+            <p className="mt-1.5 text-zinc-400">
+              The effective wiring shift is <span className="font-mono text-sky-300">&Delta; = (pos &minus; ring) mod 26</span>. So <span className="font-mono text-zinc-200">IV(J) 02</span> at window <span className="font-mono text-zinc-200">B</span> aligns internal wires identically to <span className="font-mono text-zinc-200">IV(J) 01</span> at window <span className="font-mono text-zinc-200">A</span>, while turnover still triggers on <span className="font-mono text-zinc-200">J</span>.
+            </p>
+          </div>
+
+          {/* Card 3: Three Slots & Duplicate Wheels */}
+          <div className="rounded border border-zinc-800 bg-[#08090c] p-3.5 text-xs leading-relaxed">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5 font-mono font-bold text-emerald-300">
+              <span>3. Slots &amp; Example IV(J) 01 · V(Z) 01 · V(Z) 01</span>
+              <InfoTooltip
+                title="Left SX · Middle CX · Right DX + Repeats"
+                text={`• DX (Right): advances +1 on every single keypress.\n• CX (Middle): advances when DX leaves its notch—and double-steps with SX when CX sits on its own notch.\n• SX (Left): advances only on CX turnover.\n\nIf you pick V(Z) twice (e.g. IV-V-V), both CX and DX run Rotor V wiring and both trigger turnover on Z. Real WWII machines had only 1 wheel of each I–V (60 unique orders).`}
+                align="right"
+              />
+            </div>
+            <p className="mt-2 text-zinc-400">
+              The 3 pairs govern <strong className="text-zinc-200">SX</strong> (Left/slow), <strong className="text-zinc-200">CX</strong> (Middle/double-step), and <strong className="text-zinc-200">DX</strong> (Right/fast, steps every key).
+            </p>
+            <p className="mt-1.5 text-zinc-400">
+              Selecting <span className="font-mono text-emerald-300">IV(J) 01 · V(Z) 01 · V(Z) 01</span> puts Wheel IV in SX and duplicates Wheel V (wiring <span className="font-mono text-zinc-200">VZBRG&hellip;</span>, notch <span className="font-mono text-zinc-200">Z</span>) in CX and DX. Real Wehrmacht units picked 3 distinct wheels from 5 (<span className="font-mono text-zinc-200">60</span> orders), whereas this lab lets you freely test repeats too.
+            </p>
+          </div>
+        </div>
+
+        {/* Historical 5-Rotor Spec Reference Table */}
+        <div className="mt-3 overflow-x-auto rounded border border-zinc-800 bg-[#08090c]">
+          <table className="hw-table">
+            <thead>
+              <tr>
+                <th>Selector Option</th>
+                <th>Year</th>
+                <th>Turnover Notch</th>
+                <th>When Left Neighbor Steps</th>
+                <th>26-Contact Permutation (A&rarr;Z Input)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ROTOR_IDS.map((id) => {
+                const spec = ROTORS[id];
+                return (
+                  <tr key={id}>
+                    <td className="font-mono font-bold text-amber-300">
+                      {id}({spec.notchChar})
+                    </td>
+                    <td className="font-mono text-zinc-400">{spec.year}</td>
+                    <td className="font-mono font-bold text-sky-300">{spec.notchChar}</td>
+                    <td className="font-sans text-zinc-400">
+                      Window shifts from <span className="font-mono text-zinc-200">{spec.notchChar}</span> &rarr; next letter
+                    </td>
+                    <td className="font-mono text-[11px] tracking-wider text-zinc-300">
+                      {spec.wiring}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </section>
 

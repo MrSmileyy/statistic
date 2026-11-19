@@ -81,8 +81,8 @@ export const BombeWizardPanel: React.FC<BombeWizardPanelProps> = ({
             <span className="rounded border border-zinc-800 bg-[#08090c] px-2 py-0.5 text-zinc-300">
               UKW: <strong className="text-zinc-100">{enigmaConfig.reflector}</strong>
               <InfoTooltip
-                title="Umkehrwalze (Reflector)"
-                text="Stationary wiring unit at the left end that bounces the signal back through the rotors. Guarantees no letter can ever encrypt to itself."
+                title="What is the UKW Reflector? (Umkehrwalze)"
+                text={`A fixed, non-rotating disc at the left end with 13 wire pairs connecting all 26 contacts.\n\n• Forces current to make a U-turn onto a different wire and return back through the 3 rotors.\n• Makes Enigma self-reciprocal (decrypting uses the exact same settings as encrypting).\n• Because no contact wires to itself, E(x) ≠ x always holds—the exact rule that lets Crib Collision Filtering work!\n• UKW-B vs UKW-C switches between the two historical German reflector wirings.`}
               />
             </span>
             <span className="rounded border border-zinc-800 bg-[#08090c] px-2 py-0.5 text-zinc-300">

@@ -489,8 +489,8 @@ export const BombeCabinet: React.FC<BombeCabinetProps> = ({
                   <span className="inline-flex items-center">
                     Master Indicator
                     <InfoTooltip
-                      title="Master Indicator Drums"
-                      text="Displays the candidate 3-letter message key (Grundstellung) currently being tested across all scrambler banks."
+                      title="Master Indicator, Rotors (I–V) & Reflector (B/C)"
+                      text={`• The I–V dropdowns above each drum pick which rotor wheels (Walzenlage) are mounted in all Bombe scrambler banks—these must match the daily codebook.\n• The B / C toggle picks the UKW Reflector (the fixed left-end disc of 13 wire pairs that bounces the signal back through the rotors and prevents any letter from encrypting to itself).\n• The 3 cream windows display the candidate message key (Grundstellung) currently wired under test.`}
                       align="left"
                     />
                   </span>

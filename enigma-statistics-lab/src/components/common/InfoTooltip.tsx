@@ -31,14 +31,14 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
     const el = triggerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const width = Math.min(280, window.innerWidth - 16);
+    const width = Math.min(340, window.innerWidth - 16);
 
     let desiredLeft = rect.left + rect.width / 2 - width / 2;
     if (align === 'left') desiredLeft = rect.left;
     if (align === 'right') desiredLeft = rect.right - width;
 
     const left = Math.max(8, Math.min(window.innerWidth - width - 8, desiredLeft));
-    const placeAbove = rect.bottom + 135 > window.innerHeight && rect.top > 135;
+    const placeAbove = rect.bottom + 185 > window.innerHeight && rect.top > 185;
     const top = placeAbove ? rect.top - 6 : rect.bottom + 6;
 
     setCoords({ top, left, placeAbove, width });
@@ -145,7 +145,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
                 {title}
               </div>
             )}
-            <p className="m-0 text-zinc-300">{text}</p>
+            <p className="m-0 whitespace-pre-line text-zinc-300">{text}</p>
           </div>,
           document.body
         )}

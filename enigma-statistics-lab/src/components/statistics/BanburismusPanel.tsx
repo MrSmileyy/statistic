@@ -170,15 +170,15 @@ export const BanburismusPanel: React.FC<BanburismusPanelProps> = ({
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h4 className="flex items-center font-mono text-xs font-bold text-zinc-200">
-              <span>Cumulative Deciban Trajectory (Turing Sequential Evidence)</span>
+              <span>A. Running Evidence Curve (Letter-by-Letter Decibans)</span>
               <InfoTooltip
                 title="Sequential Probability Ratio Test (SPRT)"
-                text="Tracks total evidence letter by letter. Each common letter (like E or N) pushes the line up; rare letters (like Q or X) nudge it down. Crossing +20 dB confirms natural language at 100:1 odds."
+                text={`Reads your sample text one character at a time:\n• Frequent natural letters (E, N, T) push the line UP\n• Rare letters (Q, X, Z) pull it DOWN\n• Crossing the green +20 dB dashed line means 100:1 odds in favor of real text!`}
                 align="left"
               />
             </h4>
-            <p className="mt-0.5 text-xs text-zinc-500">
-              Each character adds <span className="font-mono text-zinc-300">10 log₁₀(26 &middot; pᵢ)</span> dB. Plaintext trends upward past +20 dB; ciphertext drifts flat or negative.
+            <p className="mt-0.5 text-xs text-zinc-400">
+              Watch how evidence builds as you read left-to-right: <strong className="text-emerald-300">real language climbs steadily above +20 dB</strong>, while <strong className="text-sky-300">encrypted ciphertext stays flat or drops below 0 dB</strong>.
             </p>
           </div>
           <span
@@ -275,15 +275,15 @@ export const BanburismusPanel: React.FC<BanburismusPanelProps> = ({
         <div className="space-y-3 rounded border border-zinc-800 bg-[#08090c] p-3.5 font-mono text-xs lg:col-span-5">
           <div className="border-b border-zinc-800 pb-2">
             <div className="flex items-center font-bold text-zinc-200">
-              <span>Bayes&rsquo; Theorem in Odds Form</span>
+              <span>B. Bayes Confidence Calculator</span>
               <InfoTooltip
-                title="Bayesian Odds Update"
-                text="Updates how likely a candidate rotor setting is before vs. after seeing the decrypted text. Start with a prior guess (e.g., 1 in 17,576) and multiply by the evidence ratio 10^(W/10)."
+                title="Turning Decibans into a Percentage (Bayes' Rule)"
+                text={`Starts with how unlikely a random rotor guess is (Prior, e.g. 1 in 17,576 = 0.0057%), then multiplies those odds by the Deciban evidence ratio 10^(W/10) to output the final % confidence (Posterior) that this text is genuine plaintext.`}
                 align="left"
               />
             </div>
-            <div className="mt-0.5 text-[11px] text-zinc-500">
-              O(H₁|E) = O(H₁) &times; 10^(W / 10)
+            <div className="mt-0.5 font-sans text-[11px] text-zinc-400">
+              Converts the raw Deciban score into a final <strong className="text-zinc-200">0%&ndash;100% probability</strong> that this key is correct.
             </div>
           </div>
 
@@ -402,18 +402,40 @@ export const BanburismusPanel: React.FC<BanburismusPanelProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
             <div>
               <div className="inline-flex items-center font-bold text-zinc-200">
-                Banburismus Two-Message Depth Alignment
+                C. Banburismus: Two-Message Sliding Overlap
                 <InfoTooltip
-                  title="Banburismus Depth Overlap"
-                  text="When two Enigma messages share the same daily key and overlap in rotor steps, the exact same permutation hits the same column. Matching plain letters therefore produce identical ciphertext letters (~7% vs 3.85% random)."
+                  title="How Sliding Two Ciphertexts Reveals Rotor Depth"
+                  text={`Suppose two different messages A and B were encrypted on the same day with nearly the same starting rotors—here B started 5 clicks ahead of A.\nWhen you slide B to +5, both columns share the exact same Enigma rotor position, so whenever both plaintexts used the same letter (like E above E), their ciphertexts match too! Vertical matches jump from ~3.85% (random) up toward ~7%!`}
                   align="right"
                 />
               </div>
-              <div className="mt-0.5 font-sans text-xs text-zinc-500">
-                Message B was encrypted 5 rotor steps ahead of Message A. Slide B to offset <strong className="font-mono text-emerald-300">+5</strong> to see vertical coincidences jump above 1/26.
+              <div className="mt-0.5 font-sans text-xs text-zinc-400">
+                Slide encrypted Message <strong className="font-mono text-amber-300">B</strong> underneath <strong className="font-mono text-zinc-200">A</strong>. At the true shift (<strong className="font-mono text-emerald-300">+5</strong>), green matching columns jump well above random 3.85%.
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShiftOffset(0)}
+                className={`rounded border px-2 py-0.5 text-[10px] transition ${
+                  shiftOffset === 0
+                    ? 'border-zinc-500 bg-zinc-800 text-zinc-200'
+                    : 'border-zinc-800 bg-[#0d0e12] text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                Wrong (+0)
+              </button>
+              <button
+                type="button"
+                onClick={() => setShiftOffset(TRUE_SHIFT_DEPTH)}
+                className={`rounded border px-2 py-0.5 text-[10px] font-semibold transition ${
+                  shiftOffset === TRUE_SHIFT_DEPTH
+                    ? 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300'
+                    : 'border-emerald-900/50 bg-[#0d0e12] text-emerald-400/80 hover:border-emerald-500'
+                }`}
+              >
+                True Overlap (+{TRUE_SHIFT_DEPTH})
+              </button>
               <span className="text-zinc-500">Shift B:</span>
               <input
                 type="range"
